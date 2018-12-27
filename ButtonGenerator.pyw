@@ -1,25 +1,26 @@
 from tkinter import*
 lst = []
 class PythonApplication2:
-    def __init__(self, master,height,width):
+    def __init__(self, master,height,width,word):
         self.width=width
         self.height=height
-        self.txtBox(master)
+        self.word = word
+        self.txtBox(master,word)
         self.mButton(0,0,"yellow",master)
     #so one thing I remembered was that my arrays are not changing as my buttons change.
         #what's the difference between left button and right button which make it so hard to delete?
             #well what's changing is the width of the next instance
             #way the list is being appended lBut appends within the [width][here], meanwhile right appends [here][]
             #when destroying our object we are calling using the width of the button we pressed.
-    def txtBox(self,master):
+    def txtBox(self,master,word):
         self.txt = Entry(master, width = 60)
         self.txt.grid(row = self.height, column = self.width+1)
+        self.txt.insert(0,word)
         self.txt.focus_set()
         self.txt.bind("<Tab>", self.rAppendArr)
         self.txt.bind("<Return>", self.lAppendArr)
     def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
         self.colour = "yellow"
-        temp = [] 
         self.middleB = Button(root,bg = "yellow", width = 1,command = lambda: self.toggle_txt(master))
         self.middleB.grid(row = self.height, column = self.width+2,sticky = W)
     def toggle_txt(self,master):#yeah, so we
@@ -27,6 +28,8 @@ class PythonApplication2:
         if(self.colour == "yellow"):
             try:    
                 for x in range(0,len(lst[ArrWidth+1])):
+                    lst[ArrWidth+1][x].word = lst[ArrWidth+1][x].txt.get()
+                    print(lst[ArrWidth+1][x].txt.get())
                     lst[ArrWidth+1][x].middleB.grid_forget()
                     lst[ArrWidth+1][x].txt.grid_forget()
                     self.colour = "red"
@@ -36,7 +39,7 @@ class PythonApplication2:
         else:
             try:
                 for x in range(0,len(lst[ArrWidth+1])):
-                    lst[ArrWidth+1][x].txtBox(master)
+                    lst[ArrWidth+1][x].txtBox(master,lst[ArrWidth+1][x].word)
                     lst[ArrWidth+1][x].mButton(0,0,"yellow",master)
                     self.colour = "yellow"
                     self.middleB.configure(bg = self.colour)
@@ -44,9 +47,8 @@ class PythonApplication2:
                 print("asd")         
     def lAppendArr(self,cow):
         ArrWidth =int(self.width/2)
-        bob  = PythonApplication2(root,self.height+1,self.width)
+        bob  = PythonApplication2(root,self.height+1,self.width,"")
         lst[ArrWidth].append(bob)
-        print(lst)
         #difference between how lst is orientated vs self.width/self.height
             #   # - f(0,0)  lst[0][0] f(x,y) lst[width][height]
                     # - f(2,1) lst[1][0]
@@ -60,13 +62,12 @@ class PythonApplication2:
                 #what changes when we delete the first time and second time
                     #
     def rAppendArr(self,cow):
-        bob = PythonApplication2(root,self.height+1, self.width+2)
+        bob = PythonApplication2(root,self.height+1, self.width+2,"")
         lst.append([bob])
-        print(lst)
     
 root = Tk()
 #lst = []
-bob  = PythonApplication2(root,0,0)
+bob  = PythonApplication2(root,0,0,"")
 lst.append([bob])
 #bob.bothButtons()
 root.mainloop()
