@@ -14,8 +14,9 @@ class PythonApplication2:
     def txtBox(self,master):
         self.txt = Entry(master, width = 60)
         self.txt.grid(row = self.height, column = self.width+1)
-        self.txt.bind("<Shift_L > ", self.rAppendArr)
-        self.txt.bind("<Tab>", self.lAppendArr)
+        self.txt.focus_set()
+        self.txt.bind("<Tab>", self.rAppendArr)
+        self.txt.bind("<Return>", self.lAppendArr)
     def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
         self.colour = "yellow"
         temp = [] 
@@ -25,22 +26,18 @@ class PythonApplication2:
         ArrWidth =int(self.width/2)
         if(self.colour == "yellow"):
             try:    
-                for x in range(1,len(lst[ArrWidth])):
-                    lst[ArrWidth][x].middleB.grid_forget()
-                    lst[ArrWidth][x].leftB.grid_forget()
-                    lst[ArrWidth][x].rightB.grid_forget()
-                    lst[ArrWidth][x].txt.grid_forget()
+                for x in range(0,len(lst[ArrWidth+1])):
+                    lst[ArrWidth+1][x].middleB.grid_forget()
+                    lst[ArrWidth+1][x].txt.grid_forget()
                     self.colour = "red"
                     self.middleB.configure(bg = self.colour)
             except IndexError:
                 print("asd")
         else:
             try:
-                for x in range(1,len(lst[ArrWidth])):
-                    lst[ArrWidth][x].lButton()
-                    lst[ArrWidth][x].rButton()
-                    lst[ArrWidth][x].txtBox(master)
-                    lst[ArrWidth][x].mButton(0,0,"yellow",master)
+                for x in range(0,len(lst[ArrWidth+1])):
+                    lst[ArrWidth+1][x].txtBox(master)
+                    lst[ArrWidth+1][x].mButton(0,0,"yellow",master)
                     self.colour = "yellow"
                     self.middleB.configure(bg = self.colour)
             except IndexError:
