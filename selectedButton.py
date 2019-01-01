@@ -15,7 +15,7 @@ class PythonApplication2:
 			#when destroying our object we are calling using the width of the button we pressed.
 	def txtBox(self,master,word):
 		self.txt = Entry(master, width = 60)
-		self.txt.grid(row = self.height, column = self.width+1)
+		self.txt.grid(row = self.height, column = self.width)
 		self.txt.insert(0,word)
 		self.txt.focus_set()
 		self.txt.bind("<Tab>", self.rAppendArr)
@@ -23,7 +23,7 @@ class PythonApplication2:
 	def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
 		self.colour = "yellow"
 		self.middleB = Button(root,bg = "yellow", width = 1,command = lambda: self.toggle_txt(master))
-		self.middleB.grid(row = self.height, column = self.width+2,sticky = W)
+		self.middleB.grid(row = self.height, column = self.width+1,sticky = W)
 	def toggle_txt(self,master):#yeah, so we
 		subGoalId = self.id + "0"
 		subGoalId = conversion(subGoalId)
@@ -37,37 +37,83 @@ class PythonApplication2:
 					self.colour = "red"
 					self.middleB.configure(bg = self.colour)
 		else:
-			for x in range(0,len(lst)):
+			for x in range(0,len(lst)):	
 				currentId=conversion(lst[x].id)
 				if currentId >= subGoalId:
 					lst[x].txtBox(master,lst[x].word)
 					lst[x].mButton(0,0,"yellow",master)
 					self.colour = "yellow"
 					self.middleB.configure(bg = self.colour)
+
 	def lAppendArr(self,cow):
 		ArrWidth =int(self.width/2)
 		temp = conversion(self.id)+1
 		temp = conversion(temp)
 		bob  = PythonApplication2(root,self.height+1,self.width,"",temp)#an appended id)
 		lst.append(bob)
-
-		#difference between how lst is orientated vs self.width/self.height
-			#   # - f(0,0)  lst[0][0] f(x,y) lst[width][height]
-					# - f(2,1) lst[1][0]
-						# - f(4,2) lst[2][0]
-						# - f(4,3) lst[2][1]
-							# - f(6,4) lst[3][0]
-							# - f(6,5) lst[3][1]
-
-			#Problem 1st time we delete, it deletes all buttons within the lst[][here]
-			#second time we delete, it deletes from 1-length lst[][here]
-				#what changes when we delete the first time and second time
-					
+		#case 1. There's no next button underneath
+		#case 2. There is one directly underneath
+		#	testId = conversion(self.id)+1
+		#	count = 0
+		# 		for x in range(0,len(lst)):
+		# 	if(lst[x].id==testId):
+		# 		count=+1						
+		# 		testId=+1
+		# if(count != 0):
+		# 	bob = PythonApplication2(root,self.height+count, self.width+2,"",temp)
+		# 	lst.append(bob)	
+		#case 3, there's one diagonally
+						 
 	def rAppendArr(self,cow):
+
+		#case 1. There is one directly underneath; appends underneath all the buttons underneath directly
+		#we simply move everything underneath by 1, and append it normally
+		# findThis = conversion(self.id)+1
+		# if(searchForId(0,findThis)==0): # if the diagonal button doesn't exist within lst
+		# 	temp =self.id + "0"
+		# 	bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
+		# 	lst.append(bob)
+		# else:		
+		# 	moveDown(self.id)
+		# 	temp =self.id + "0"
+		# 	bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
+		# 	lst.append(bob)
 		temp =self.id + "0"
 		bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
 		lst.append(bob)
+		self.moveDown()
+		#case 2, there's one diagonally
+		#case 3, there's no next button underneath
+	def moveDown(self):#moves all elements underneath the self.id
+		translateId = conversion(self.id)
+		for x in range(0,len(lst)):
+			compare1 = conversion(self.id)
+			if compare1 > translateId:#what we do here is simply increment it's height(not id)
+				lst[x].height +=1
+				lst[x].txt.grid(row = lst[x].height, column = lst[x].width)
+				lst[x].middleB.grid(row = lst[x].height, column = lst[x].width)
+		increaseId = findWidthId(self.id)
+		for x in range(0,len(increaseId)):
+			temp = conversion(lst[increaseId[x]].id)+1  # problem is here, is possibly, it's searching for all elements.
+			lst[x].id = temp
 
+def searchForId(startFromHere,findId): #goes through entire array searching for a specific id. Returns the location in lst
+	for x in range(startFromHere,len(lst)):													# returns false if it's in list
+		if findId == lst[x].id:
+			return x
+	return 0
+def findWidthId(findId):#this returns all the id's with a given width. Returned in an list
+	arrLocations = []
+	for y in range(0,len(lst)):
+		print(lst[y].id)
+	print("end")
+	for x in range(0,len(lst)):
+		#criteria for being in the same row is same length, and same characters up till len-1
+		if(len(findId)==len(lst[x].id)):
+			if(findId[0:len(findId)-1] == lst[x].id[0:len(lst[x].id)-1]):
+				if(findId[len(findId)-1]) <= lst[x].id[len(lst[x])-1]:
+					arrLocations.append(x)
+	return arrLocations				 
 def conversion(converting):#this method converts string to int, or int to string
 	try:
 		#if it is a string with a number it will run this, changing it to an int
@@ -107,4 +153,3 @@ root.mainloop()
 	#there are these functions, creating new goal, creating meta goals, expending/contracting meta-goals, deleting goals, and finishing goals
 	#finishing goals will be done with a regular button.
 	#deleting goals will be done with possibly a more complex way
-	#
