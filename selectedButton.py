@@ -1,4 +1,5 @@
 from tkinter import*
+import operator
 lst = []
 class PythonApplication2:
 	def __init__(self, master,height,width,word,id):
@@ -51,6 +52,7 @@ class PythonApplication2:
 		temp = conversion(temp)
 		bob  = PythonApplication2(root,self.height+1,self.width,"",temp)#an appended id)
 		lst.append(bob)
+		self.moveDown()
 		#case 1. There's no next button underneath
 		#case 2. There is one directly underneath
 		#	testId = conversion(self.id)+1
@@ -70,38 +72,32 @@ class PythonApplication2:
 		# we simply move everything underneath by 1, and append it normally
 		findThis = conversion(self.id)+1
 	#	orThis
-		if(not(searchForId(0,findThis)==0)): # check if there's button underneath
-			temp =self.id + "0"
-			bob = PythonApplication2(root,self.height, self.width+2,"",temp)
-			lst.append(bob)
-			self.moveDown()
-		else :		# if there's a button diagonally needs to be implemented in the future
-			temp =self.id + "0"
-			bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
-			lst.append(bob)
+		temp =self.id + "0"
+		bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
+		lst.append(bob)
+		self.moveDown()
 		#case 2, there's one diagonally
 		#case 3, there's no next button underneath
 	def moveDown(self):#moves all elements underneath the self.id
-		translateId = conversion(self.id)
-		for x in range(0,len(lst)):
-			compare1 = conversion(lst[x].id)
-			# print(compare1)
-			if compare1 > translateId:#what we do here is simply increment it's height(not id)
-				print(lst[x].height)
-				lst[x].height +=1
-				lst[x].txt.grid_configure(row = lst[x].height, column = lst[x].width)
-				lst[x].middleB.grid_configure(row = lst[x].height, column = lst[x].width+1)
+		sortedList = sortButtons() # use this to match id to x
+		print(sortedList)
+		for x in range(0,len(lst)-1):
+			lst[sortedList[x][1]].height = x 
+			lst[sortedList[x][1]].txt.grid_configure(row = x, column = lst[sortedList[x][1]].width)
+			lst[sortedList[x][1]].middleB.grid_configure(row = x, column = lst[sortedList[x][1]].width+1)
 		# increaseId = findWidthId(self.id)
 		# for x in range(0,len(increaseId)):
 		# 	temp = conversion(lst[increaseId[x]].id)+1  # problem is here, is possibly, it's searching for all elements.
 		# 	lst[x].id = temp
-	def sortButtons(self):
+def sortButtons():
 	#we group all elements with [0],[1],.....[n]
 	#look at second dimension of [0], and group from empty-max element. afterwards append into sortedArr					  #
-		temp = []
-		for x in range(0,len(lst)-1):
-			temp.append(lst[x].id)
-		return temp.sort()	
+	temp = {}
+	for x in range(0,len(lst)):
+		temp[lst[x].id] = x
+	sorted_x = sorted(temp.items(), key=operator.itemgetter(0))
+	print(sorted_x)
+	return sorted_x	
 
 def searchForId(startFromHere,findId): #goes through entire array searching for a specific id. Returns the location in lst
 	for x in range(0,len(lst)):													# returns false if it's in list
