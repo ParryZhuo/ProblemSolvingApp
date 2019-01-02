@@ -27,22 +27,24 @@ class PythonApplication2:
 		self.middleB.grid(row = self.height, column = self.width+1,sticky = W)
 	def toggle_txt(self,master):#yeah, so we
 		subGoalId = self.id + "0"
-		subGoalId = conversion(subGoalId)
+		subGoalCompare = conversion(subGoalId)
 		if(self.colour == "yellow"):
-			for x in range(0,len(lst)): # loop from id0 - idN
-				currentId=conversion(lst[x].id)
-				if currentId >= subGoalId: # error is here
-					lst[x].word =  lst[x].txt.get()
-					lst[x].middleB.grid_forget()
-					lst[x].txt.grid_forget()
+			subGoalLst = findMYCHILDRENPLEASE(subGoalId)
+			for x in range(0,len(subGoalLst)): # loop from id0 - idN
+				currentId=conversion(lst[subGoalLst[x]].id)
+				if currentId >= subGoalCompare: # error is here
+					lst[subGoalLst[x]].word =  lst[subGoalLst[x]].txt.get()
+					lst[subGoalLst[x]].middleB.grid_forget()
+					lst[subGoalLst[x]].txt.grid_forget()
 					self.colour = "red"
 					self.middleB.configure(bg = self.colour)
 		else:
-			for x in range(0,len(lst)):	
-				currentId=conversion(lst[x].id)
-				if currentId >= subGoalId:
-					lst[x].txtBox(master,lst[x].word)
-					lst[x].mButton(0,0,"yellow",master)
+			subGoalLst = findMYCHILDRENPLEASE(subGoalId)
+			for x in range(0,len(subGoalLst)):	
+				currentId=conversion(lst[subGoalLst[x]].id)
+				if currentId >= subGoalCompare:
+					lst[subGoalLst[x]].txtBox(master,lst[subGoalLst[x]].word)
+					lst[subGoalLst[x]].mButton(0,0,"yellow",master)
 					self.colour = "yellow"
 					self.middleB.configure(bg = self.colour)
 
@@ -80,8 +82,7 @@ class PythonApplication2:
 		#case 3, there's no next button underneath
 	def moveDown(self):#moves all elements underneath the self.id
 		sortedList = sortButtons() # use this to match id to x
-		print(sortedList)
-		for x in range(0,len(lst)-1):
+		for x in range(0,len(lst)):
 			lst[sortedList[x][1]].height = x 
 			lst[sortedList[x][1]].txt.grid_configure(row = x, column = lst[sortedList[x][1]].width)
 			lst[sortedList[x][1]].middleB.grid_configure(row = x, column = lst[sortedList[x][1]].width+1)
@@ -96,7 +97,6 @@ def sortButtons():
 	for x in range(0,len(lst)):
 		temp[lst[x].id] = x
 	sorted_x = sorted(temp.items(), key=operator.itemgetter(0))
-	print(sorted_x)
 	return sorted_x	
 
 def searchForId(startFromHere,findId): #goes through entire array searching for a specific id. Returns the location in lst
@@ -117,7 +117,18 @@ def findWidthId(findId):#this returns all the id's with a given width. Returned 
 			if(findId[0:len(findId)-1] == lst[x].id[0:len(lst[x].id)-1]):
 				if(findId[len(findId)-1]) <= lst[x].id[len(lst[x].id)-1]:
 					arrLocations.append(x)
-	return arrLocations				 
+	return arrLocations
+def findMYCHILDRENPLEASE(findId):#this returns all the id's with a given width. Returned in an list
+	arrLocations = []
+	# for y in range(0,len(lst)):
+	# 	print(lst[y].id)
+	# print("end")
+	for x in range(0,len(lst)):
+		#criteria for being a child is, and same characters up till len-1
+		if(findId[0:len(findId)-1] == lst[x].id[0:len(findId)-1]):
+			if(findId[len(findId)-1]) <= lst[x].id[0:len(findId)-1]:
+				arrLocations.append(x)
+	return arrLocations					 
 
 def conversion(converting):#this method converts string to int, or int to string
 	try:
