@@ -66,54 +66,63 @@ class PythonApplication2:
 						 
 	def rAppendArr(self,cow):
 
-		#case 1. There is one directly underneath; appends underneath all the buttons underneath directly
-		#we simply move everything underneath by 1, and append it normally
-		# findThis = conversion(self.id)+1
-		# if(searchForId(0,findThis)==0): # if the diagonal button doesn't exist within lst
-		# 	temp =self.id + "0"
-		# 	bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
-		# 	lst.append(bob)
-		# else:		
-		# 	moveDown(self.id)
-		# 	temp =self.id + "0"
-		# 	bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
-		# 	lst.append(bob)
-		temp =self.id + "0"
-		bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
-		lst.append(bob)
-		self.moveDown()
+		# case 1. There is one directly underneath; appends underneath all the buttons underneath directly
+		# we simply move everything underneath by 1, and append it normally
+		findThis = conversion(self.id)+1
+	#	orThis
+		if(not(searchForId(0,findThis)==0)): # check if there's button underneath
+			temp =self.id + "0"
+			bob = PythonApplication2(root,self.height, self.width+2,"",temp)
+			lst.append(bob)
+			self.moveDown()
+		else :		# if there's a button diagonally needs to be implemented in the future
+			temp =self.id + "0"
+			bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
+			lst.append(bob)
 		#case 2, there's one diagonally
 		#case 3, there's no next button underneath
 	def moveDown(self):#moves all elements underneath the self.id
 		translateId = conversion(self.id)
 		for x in range(0,len(lst)):
-			compare1 = conversion(self.id)
+			compare1 = conversion(lst[x].id)
+			# print(compare1)
 			if compare1 > translateId:#what we do here is simply increment it's height(not id)
+				print(lst[x].height)
 				lst[x].height +=1
-				lst[x].txt.grid(row = lst[x].height, column = lst[x].width)
-				lst[x].middleB.grid(row = lst[x].height, column = lst[x].width)
-		increaseId = findWidthId(self.id)
-		for x in range(0,len(increaseId)):
-			temp = conversion(lst[increaseId[x]].id)+1  # problem is here, is possibly, it's searching for all elements.
-			lst[x].id = temp
+				lst[x].txt.grid_configure(row = lst[x].height, column = lst[x].width)
+				lst[x].middleB.grid_configure(row = lst[x].height, column = lst[x].width+1)
+		# increaseId = findWidthId(self.id)
+		# for x in range(0,len(increaseId)):
+		# 	temp = conversion(lst[increaseId[x]].id)+1  # problem is here, is possibly, it's searching for all elements.
+		# 	lst[x].id = temp
+	def sortButtons(self):
+	#we group all elements with [0],[1],.....[n]
+	#look at second dimension of [0], and group from empty-max element. afterwards append into sortedArr					  #
+		temp = []
+		for x in range(0,len(lst)-1):
+			temp.append(lst[x].id)
+		return temp.sort()	
 
 def searchForId(startFromHere,findId): #goes through entire array searching for a specific id. Returns the location in lst
-	for x in range(startFromHere,len(lst)):													# returns false if it's in list
-		if findId == lst[x].id:
+	for x in range(0,len(lst)):													# returns false if it's in list
+		temp  = conversion(lst[x].id)	
+		if findId == temp:
 			return x
 	return 0
+
 def findWidthId(findId):#this returns all the id's with a given width. Returned in an list
 	arrLocations = []
-	for y in range(0,len(lst)):
-		print(lst[y].id)
-	print("end")
+	# for y in range(0,len(lst)):
+	# 	print(lst[y].id)
+	# print("end")
 	for x in range(0,len(lst)):
 		#criteria for being in the same row is same length, and same characters up till len-1
 		if(len(findId)==len(lst[x].id)):
 			if(findId[0:len(findId)-1] == lst[x].id[0:len(lst[x].id)-1]):
-				if(findId[len(findId)-1]) <= lst[x].id[len(lst[x])-1]:
+				if(findId[len(findId)-1]) <= lst[x].id[len(lst[x].id)-1]:
 					arrLocations.append(x)
 	return arrLocations				 
+
 def conversion(converting):#this method converts string to int, or int to string
 	try:
 		#if it is a string with a number it will run this, changing it to an int
