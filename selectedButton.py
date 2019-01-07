@@ -1,6 +1,9 @@
 from tkinter import*
 import operator
-lst = []
+from settings import storeObject
+from borderButtons import borderButtons
+# from borderButtons import borderButtons
+# lst = []
 class PythonApplication2:
 	def __init__(self, master,height,width,word,id):
 		self.width=width
@@ -9,6 +12,9 @@ class PythonApplication2:
 		self.txtBox(master,word)
 		self.mButton(0,0,"yellow",master)
 		self.id = id
+		a = storeObject(self.height,self.width,word,id)
+		a.add()
+
 	#so one thing I remembered was that my arrays are not changing as my buttons change.
 		#what's the difference between left button and right button which make it so hard to delete?
 			#well what's changing is the width of the next instance
@@ -21,6 +27,17 @@ class PythonApplication2:
 		self.txt.focus_set()
 		self.txt.bind("<Tab>", self.rAppendArr)
 		self.txt.bind("<Return>", self.lAppendArr)
+		# we need to bind each click, enter, or return.
+		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
+	def saveButton(self,bob):
+		try: # if there is something in temp, we insert txt into settings.py
+			# must find the lst location in settings that matches bob.id. Then insert bob.txt.get into lst[x]
+			foundIdLoc=searchForIdLoc(bob.id)
+			if( not (foundIdLoc == 0)):
+				a = storeObject(-1,-1,"","-1")
+				a.changeTxt(foundIdLoc , bob.txt.get())
+		except:#if there's nothing in temp, we just put that into bob
+			temp = bob
 	def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
 		self.colour = "yellow"
 		self.middleB = Button(root,bg = "yellow", width = 1,command = lambda: self.toggle_txt(master))
@@ -53,20 +70,9 @@ class PythonApplication2:
 		temp = conversion(self.id)+1
 		temp = conversion(temp)
 		bob  = PythonApplication2(root,self.height+1,self.width,"",temp)#an appended id)
+		
 		lst.append(bob)
 		self.moveDown()
-		#case 1. There's no next button underneath
-		#case 2. There is one directly underneath
-		#	testId = conversion(self.id)+1
-		#	count = 0
-		# 		for x in range(0,len(lst)):
-		# 	if(lst[x].id==testId):
-		# 		count=+1						
-		# 		testId=+1
-		# if(count != 0):
-		# 	bob = PythonApplication2(root,self.height+count, self.width+2,"",temp)
-		# 	lst.append(bob)	
-		#case 3, there's one diagonally
 						 
 	def rAppendArr(self,cow):
 
@@ -82,14 +88,44 @@ class PythonApplication2:
 		#case 3, there's no next button underneath
 	def moveDown(self):#moves all elements underneath the self.id
 		sortedList = sortButtons() # use this to match id to x
+		a = storeObject(-1,-1,"",-1)
 		for x in range(0,len(lst)):
-			lst[sortedList[x][1]].height = x 
+			lst[sortedList[x][1]].height = x #[x][1] is looking at the x'th element and the items in the dictionary is [1]
 			lst[sortedList[x][1]].txt.grid_configure(row = x, column = lst[sortedList[x][1]].width)
 			lst[sortedList[x][1]].middleB.grid_configure(row = x, column = lst[sortedList[x][1]].width+1)
+			
 		# increaseId = findWidthId(self.id)
 		# for x in range(0,len(increaseId)):
 		# 	temp = conversion(lst[increaseId[x]].id)+1  # problem is here, is possibly, it's searching for all elements.
 		# 	lst[x].id = temp
+def addOpenFile(master):
+	gui.subMenu.add_command(label = "save", command = save)
+	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
+
+
+def openTheFile(master):
+	file = "cow.txt"
+	with open(file) as f:
+		content = f.readlines()
+	content = [x.strip("") for x in content] 
+	for x in range(0,len(content)):
+		line = content[x]
+		bobData = line.split(",")
+		bobData[0] = conversion(bobData[0])
+		bobData[1] = conversion(bobData[1])
+		bob = PythonApplication2(root,bobData[0],bobData[1],bobData[2],bobData[3])
+		lst.append(bob)
+		print(bob.height)
+		a = storeObject(-1,-1,"","-1")
+
+def save():
+	file = open("cow.txt", "w+")
+	a = storeObject(-1,-1,"","-1")
+	for x in range(0,len(lst)):#height,width,word,id - order of object
+		lst[x].word = lst[x].txt.get()
+		file.write( str(lst[x].height) + ","  + str(lst[x].width) + "," + lst[x].word+"," + lst[x].id + "\n")
+	file.close()
+
 def sortButtons():
 	#we group all elements with [0],[1],.....[n]
 	#look at second dimension of [0], and group from empty-max element. afterwards append into sortedArr					  #
@@ -99,9 +135,10 @@ def sortButtons():
 	sorted_x = sorted(temp.items(), key=operator.itemgetter(0))
 	return sorted_x	
 
-def searchForId(startFromHere,findId): #goes through entire array searching for a specific id. Returns the location in lst
-	for x in range(0,len(lst)):													# returns false if it's in list
-		temp  = conversion(lst[x].id)	
+def searchForIdLoc(findId): #goes through entire array searching for a specific id. Returns the location in lst
+	a = storeObject(-1,-1,"",-1)
+	for x in range(0,len(a.retLst)):													# returns false if it's in list
+		temp  = conversion(a.retId(x))	
 		if findId == temp:
 			return x
 	return 0
@@ -140,32 +177,14 @@ def conversion(converting):#this method converts string to int, or int to string
 	return converted
 
 root = Tk()
-#lst = []
+lst = []
+setGlobal = storeObject(0,0,"","1")
+setGlobal.initGlobal()
+setGlobal.add()
 bob  = PythonApplication2(root,0,0,"","1")
-lst.append(bob)
+gui = borderButtons(root)
+addOpenFile(root)
+print("im here")
+# lst.append(bob)
 #bob.bothButtons()
 root.mainloop()
-
-#2ND GOAL
-	#how should my buttons work?
-	#1. the left button should append regardless of which button is pressed as long as it is lst[][here]
-	#2. the rest of the buttons underneath the lst[][x] should move downwards once if the right button is pressed
-	#3. the buttons should then compress when mid but is pressed. 
-
-#broader goals. 
-	#should i start implementing the intuitive buttons, or should I make the buttons work correctly?. Well lets start from the bottom
-	# which one uses the otherone.
-	#well, I would say the intuitive buttons. I'm feeling pretty scared about implementing this part because this is reallllly difficult.
-
-
-#1ST GOAL
-	#Create buttons that work not by button presses, but instead with just the keyboard mainly.
-	#1. we need a way to select a button. That way we can do the button presses.
-	#2. so pressing tab will be like the rig ht button
-	#3. pressing enter will make the textbox move to the next line?
-	#4 pressing space bar will be like the left button
-
-#Implementing 1st goal
-	#there are these functions, creating new goal, creating meta goals, expending/contracting meta-goals, deleting goals, and finishing goals
-	#finishing goals will be done with a regular button.
-	#deleting goals will be done with possibly a more complex way
