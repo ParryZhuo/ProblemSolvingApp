@@ -2,8 +2,15 @@ from tkinter import*
 import operator
 from settings import storeObject
 from borderButtons import borderButtons
+from MalleuableTextBox import AutoResizedText
 # from borderButtons import borderButtons
 # lst = []
+
+# save function doesn't work that well, doesn't save twice
+# once saved, midbutton doesnt work
+# we need to make textbox work take into account of width of word
+#the first button does not work o.0
+
 class PythonApplication2:
 	def __init__(self, master,height,width,word,id):
 		self.width=width
@@ -21,12 +28,16 @@ class PythonApplication2:
 			#way the list is being appended lBut appends within the [width][here], meanwhile right appends [here][]
 			#when destroying our object we are calling using the width of the button we pressed.
 	def txtBox(self,master,word):
-		self.txt = Entry(master, width = 60)
+		nlines = word.count('\n')
+		nlines = (nlines * 25)+25
+		nWidth = word.split("\n")
+		maxLineLength = findMaxLine(nWidth)
+		self.txt = AutoResizedText(root, family="Arial",size=15, width = maxLineLength , height = nlines) #how to make int go by characters or something similar
 		self.txt.grid(row = self.height, column = self.width)
-		self.txt.insert(0,word)
+		self.txt.insert(word)
 		self.txt.focus_set()
 		self.txt.bind("<Tab>", self.rAppendArr)
-		self.txt.bind("<Return>", self.lAppendArr)
+		self.txt.bind("<Shift-Return>", self.lAppendArr)
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def saveButton(self,bob):
@@ -35,7 +46,7 @@ class PythonApplication2:
 			foundIdLoc=searchForIdLoc(bob.id)
 			if( not (foundIdLoc == 0)):
 				a = storeObject(-1,-1,"","-1")
-				a.changeTxt(foundIdLoc , bob.txt.get())
+				a.changeTxt(foundIdLoc , bob.txt.get("1.0",END))
 		except:#if there's nothing in temp, we just put that into bob
 			temp = bob
 	def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
@@ -50,7 +61,7 @@ class PythonApplication2:
 			for x in range(0,len(subGoalLst)): # loop from id0 - idN
 				currentId=conversion(lst[subGoalLst[x]].id)
 				if currentId >= subGoalCompare: # error is here
-					lst[subGoalLst[x]].word =  lst[subGoalLst[x]].txt.get()
+					lst[subGoalLst[x]].word =  lst[subGoalLst[x]].txt.get("1.0",END)
 					lst[subGoalLst[x]].middleB.grid_forget()
 					lst[subGoalLst[x]].txt.grid_forget()
 					self.colour = "red"
@@ -104,7 +115,7 @@ def addOpenFile(master):
 
 
 def openTheFile(master):
-	file = "cow.txt"
+	file = "goals.txt"
 	with open(file) as f:
 		content = f.readlines()
 	content = [x.strip("") for x in content] 
@@ -113,18 +124,22 @@ def openTheFile(master):
 		bobData = line.split(",")
 		bobData[0] = conversion(bobData[0])
 		bobData[1] = conversion(bobData[1])
-		bob = PythonApplication2(root,bobData[0],bobData[1],bobData[2],bobData[3])
+		putIntoLines = bobData[2].replace("!@#","\n")
+		bob = PythonApplication2(root,bobData[0],bobData[1],putIntoLines,bobData[3])
 		lst.append(bob)
-		print(bob.height)
 		a = storeObject(-1,-1,"","-1")
 
 def save():
-	file = open("cow.txt", "w+")
+	file = open("goals.txt", "w+")
 	a = storeObject(-1,-1,"","-1")
 	for x in range(0,len(lst)):#height,width,word,id - order of object
-		lst[x].word = lst[x].txt.get()
-		file.write( str(lst[x].height) + ","  + str(lst[x].width) + "," + lst[x].word+"," + lst[x].id + "\n")
+		lst[x].word = lst[x].txt.get("1.0",END)
+		putInALine = lst[x].word.replace("\n","!@#") #puts next lines as !@#
+
+		file.write( str(lst[x].height) + ","  + str(lst[x].width) + "," + putInALine+"," + lst[x].id + "\n")
 	file.close()
+
+# def delete(): ok im done. 4 duh day I guess :(-)
 
 def sortButtons():
 	#we group all elements with [0],[1],.....[n]
@@ -176,6 +191,14 @@ def conversion(converting):#this method converts string to int, or int to string
 		converted = str(converting)
 	return converted
 
+def findMaxLine(myList):
+	try:
+		for x in range(1,len(myList)):
+			if myList[0] < myList[x]:
+				myList[0] = myList[x]
+		return int(myList[0])
+	except:
+		return 100
 root = Tk()
 lst = []
 setGlobal = storeObject(0,0,"","1")
@@ -184,7 +207,6 @@ setGlobal.add()
 bob  = PythonApplication2(root,0,0,"","1")
 gui = borderButtons(root)
 addOpenFile(root)
-print("im here")
 # lst.append(bob)
 #bob.bothButtons()
 root.mainloop()

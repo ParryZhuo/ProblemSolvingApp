@@ -29,6 +29,7 @@ class storeObject:
 			bobData[1] = conversion(bobData[1])
 			bob = PythonApplication2(root,bobData[0],bobData[1],bobData[2],bobData[3])
 			a = storeObject(-1,-1,"","-1")
+	
 	def retLst(self):
 		return lst
 	def retH(self,location):# we need lst location in order for this to work. Fortunately we are given 
