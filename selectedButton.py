@@ -3,13 +3,14 @@ import operator
 from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
+from MouseWheel import Scrolling_Area
 # from borderButtons import borderButtons
 # lst = []
 
-# save function doesn't work that well, doesn't save twice
-# once saved, midbutton doesnt work
+# save function doesn't work that well, doesn't save twice - DONEEEEEEEEEEEEEE
+#save function doesn't take into account the width of the word.
 # we need to make textbox work take into account of width of word
-#the first button does not work o.0
+#id digits only work up till 10
 
 class PythonApplication2:
 	def __init__(self, master,height,width,word,id):
@@ -19,9 +20,6 @@ class PythonApplication2:
 		self.txtBox(master,word)
 		self.mButton(0,0,"yellow",master)
 		self.id = id
-		a = storeObject(self.height,self.width,word,id)
-		a.add()
-
 	#so one thing I remembered was that my arrays are not changing as my buttons change.
 		#what's the difference between left button and right button which make it so hard to delete?
 			#well what's changing is the width of the next instance
@@ -33,19 +31,23 @@ class PythonApplication2:
 		nWidth = word.split("\n")
 		maxLineLength = findMaxLine(nWidth)
 		self.txt = AutoResizedText(root, family="Arial",size=15, width = maxLineLength , height = nlines) #how to make int go by characters or something similar
+		# scrollbar = scrollbar(root,command = test._textarea)
 		self.txt.grid(row = self.height, column = self.width)
 		self.txt.insert(word)
+		self.txt._fit_to_size_of_text(word)
 		self.txt.focus_set()
 		self.txt.bind("<Tab>", self.rAppendArr)
 		self.txt.bind("<Shift-Return>", self.lAppendArr)
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
+	def insertText(self,):#insert word into Text
+		self.txt = AutoResizedText(root, family="Arial",size=15, width = maxLineLength , height = nlines)
+		self.txt.grid(row = self.height, column = self.width)
 	def saveButton(self,bob):
 		try: # if there is something in temp, we insert txt into settings.py
 			# must find the lst location in settings that matches bob.id. Then insert bob.txt.get into lst[x]
 			foundIdLoc=searchForIdLoc(bob.id)
 			if( not (foundIdLoc == 0)):
-				a = storeObject(-1,-1,"","-1")
 				a.changeTxt(foundIdLoc , bob.txt.get("1.0",END))
 		except:#if there's nothing in temp, we just put that into bob
 			temp = bob
@@ -78,6 +80,7 @@ class PythonApplication2:
 
 	def lAppendArr(self,cow):
 		ArrWidth =int(self.width/2)
+		temp = self.word[0:len(self.word)-1]
 		temp = conversion(self.id)+1
 		temp = conversion(temp)
 		bob  = PythonApplication2(root,self.height+1,self.width,"",temp)#an appended id)
@@ -92,15 +95,19 @@ class PythonApplication2:
 		findThis = conversion(self.id)+1
 	#	orThis
 		temp =self.id + "0"
+		self.word = self.word[0:len(self.word)-2]
 		bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
 		lst.append(bob)
 		self.moveDown()
+		self.txt.removeLastChars(2)
 		#case 2, there's one diagonally
 		#case 3, there's no next button underneath
 	def moveDown(self):#moves all elements underneath the self.id
 		sortedList = sortButtons() # use this to match id to x
-		a = storeObject(-1,-1,"",-1)
 		for x in range(0,len(lst)):
+			print("\n")
+		for x in range(0,len(lst)):
+			print(sortedList[x][1])
 			lst[sortedList[x][1]].height = x #[x][1] is looking at the x'th element and the items in the dictionary is [1]
 			lst[sortedList[x][1]].txt.grid_configure(row = x, column = lst[sortedList[x][1]].width)
 			lst[sortedList[x][1]].middleB.grid_configure(row = x, column = lst[sortedList[x][1]].width+1)
@@ -111,47 +118,49 @@ class PythonApplication2:
 		# 	lst[x].id = temp
 def addOpenFile(master):
 	gui.subMenu.add_command(label = "save", command = save)
-	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
-
-
+	gui.subMenu.add_command(label = "Open", command = lambda: createEmptyLst(master))
+def createEmptyLst(master):
+	lst = []
+	openTheFile(master)
 def openTheFile(master):
-	file = "goals.txt"
+	file = "daily.txt"
 	with open(file) as f:
 		content = f.readlines()
-	content = [x.strip("") for x in content] 
+		content = [x.strip() for x in content]
 	for x in range(0,len(content)):
 		line = content[x]
 		bobData = line.split(",")
-		bobData[0] = conversion(bobData[0])
-		bobData[1] = conversion(bobData[1])
+		bobData[0] = int(conversion(bobData[0]))
+		bobData[1] = int(conversion(bobData[1]))
+		temp = str(bobData[3])
+		# print(temp)
 		putIntoLines = bobData[2].replace("!@#","\n")
-		bob = PythonApplication2(root,bobData[0],bobData[1],putIntoLines,bobData[3])
+		print(putIntoLines)
+		bob = PythonApplication2(master,bobData[0],bobData[1],putIntoLines,temp) # I think the reason is because we are using a different root each time?)
 		lst.append(bob)
-		a = storeObject(-1,-1,"","-1")
 
 def save():
-	file = open("goals.txt", "w+")
-	a = storeObject(-1,-1,"","-1")
+	file = open("daily.txt", "w+")
 	for x in range(0,len(lst)):#height,width,word,id - order of object
 		lst[x].word = lst[x].txt.get("1.0",END)
-		putInALine = lst[x].word.replace("\n","!@#") #puts next lines as !@#
-
-		file.write( str(lst[x].height) + ","  + str(lst[x].width) + "," + putInALine+"," + lst[x].id + "\n")
+		putInALine = lst[x].word.replace("\n","!@#") #pu6s next lines as !@#
+		# print(lst[x].height)
+		file.write( str(lst[x].height) + ","  + str(lst[x].width) + "," + putInALine+"," + str(lst[x].id) + "\n")
 	file.close()
 
 # def delete(): ok im done. 4 duh day I guess :(-)
 
 def sortButtons():
 	#we group all elements with [0],[1],.....[n]
-	#look at second dimension of [0], and group from empty-max element. afterwards append into sortedArr					  #
+	#look at second dimension of [0], and group from empty-max element. afterwards append into sortedArr#
 	temp = {}
-	for x in range(0,len(lst)):
+	print(len(lst))
+	for x in range(0,len(lst)): 
 		temp[lst[x].id] = x
 	sorted_x = sorted(temp.items(), key=operator.itemgetter(0))
 	return sorted_x	
 
 def searchForIdLoc(findId): #goes through entire array searching for a specific id. Returns the location in lst
-	a = storeObject(-1,-1,"",-1)
 	for x in range(0,len(a.retLst)):													# returns false if it's in list
 		temp  = conversion(a.retId(x))	
 		if findId == temp:
@@ -197,16 +206,21 @@ def findMaxLine(myList):
 			if myList[0] < myList[x]:
 				myList[0] = myList[x]
 		return int(myList[0])
-	except:
+	except ValueError:
 		return 100
+def printLst():
+	for x in range(0,len[lst]):
+		print(lst[x].id)
 root = Tk()
 lst = []
-setGlobal = storeObject(0,0,"","1")
-setGlobal.initGlobal()
-setGlobal.add()
+mouse = Scrolling_Area(root)
+mouse.grid(row = 0, column = 999)
 bob  = PythonApplication2(root,0,0,"","1")
+lst.append(bob)
 gui = borderButtons(root)
 addOpenFile(root)
-# lst.append(bob)
 #bob.bothButtons()
 root.mainloop()
+#so here are some actual problems i'll be attempting to save
+#i'll be attempting to save it so that it is exactly the same
+	#currently the list isn't being appended in the same order?
