@@ -14,10 +14,11 @@ from MouseWheel import Scrolling_Area
 
 class PythonApplication2:
 	def __init__(self, master,height,width,word,id):
+		self.master = master
 		self.width=width
 		self.height=height
 		self.word = word
-		self.txtBox(master,word)
+		self.txtBox(self.master,word)
 		self.mButton(0,0,"yellow",master)
 		self.id = id
 	#so one thing I remembered was that my arrays are not changing as my buttons change.
@@ -30,8 +31,8 @@ class PythonApplication2:
 		nlines = (nlines * 25)+25
 		nWidth = word.split("\n")
 		maxLineLength = findMaxLine(nWidth)
-		self.txt = AutoResizedText(root, family="Arial",size=15, width = maxLineLength , height = nlines) #how to make int go by characters or something similar
-		# scrollbar = scrollbar(root,command = test._textarea)
+		self.txt = AutoResizedText(self.master, family="Arial",size=15, width = maxLineLength , height = nlines) #how to make int go by characters or something similar
+		# scrollbar = scrollbar(master,command = test._textarea)
 		self.txt.grid(row = self.height, column = self.width)
 		self.txt.insert(word)
 		self.txt._fit_to_size_of_text(word)
@@ -41,7 +42,7 @@ class PythonApplication2:
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def insertText(self,):#insert word into Text
-		self.txt = AutoResizedText(root, family="Arial",size=15, width = maxLineLength , height = nlines)
+		self.txt = AutoResizedText(self.master, family="Arial",size=15, width = maxLineLength , height = nlines)
 		self.txt.grid(row = self.height, column = self.width)
 	def saveButton(self,bob):
 		try: # if there is something in temp, we insert txt into settings.py
@@ -53,7 +54,7 @@ class PythonApplication2:
 			temp = bob
 	def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
 		self.colour = "yellow"
-		self.middleB = Button(root,bg = "yellow", width = 1,command = lambda: self.toggle_txt(master))
+		self.middleB = Button(self.master,bg = "yellow", width = 1,command = lambda: self.toggle_txt(self.master))
 		self.middleB.grid(row = self.height, column = self.width+1,sticky = W)
 	def toggle_txt(self,master):#yeah, so we
 		subGoalId = self.id + "0"
@@ -73,8 +74,8 @@ class PythonApplication2:
 			for x in range(0,len(subGoalLst)):	
 				currentId=conversion(lst[subGoalLst[x]].id)
 				if currentId >= subGoalCompare:
-					lst[subGoalLst[x]].txtBox(master,lst[subGoalLst[x]].word)
-					lst[subGoalLst[x]].mButton(0,0,"yellow",master)
+					lst[subGoalLst[x]].txtBox(self.master,lst[subGoalLst[x]].word)
+					lst[subGoalLst[x]].mButton(0,0,"yellow",self.master)
 					self.colour = "yellow"
 					self.middleB.configure(bg = self.colour)
 
@@ -83,7 +84,7 @@ class PythonApplication2:
 		temp = self.word[0:len(self.word)-1]
 		temp = conversion(self.id)+1
 		temp = conversion(temp)
-		bob  = PythonApplication2(root,self.height+1,self.width,"",temp)#an appended id)
+		bob  = PythonApplication2(self.master,self.height+1,self.width,"",temp)#an appended id)
 		
 		lst.append(bob)
 		self.moveDown()
@@ -96,7 +97,7 @@ class PythonApplication2:
 	#	orThis
 		temp =self.id + "0"
 		self.word = self.word[0:len(self.word)-2]
-		bob = PythonApplication2(root,self.height+1, self.width+2,"",temp)
+		bob = PythonApplication2(self.master,self.height+1, self.width+2,"",temp)
 		lst.append(bob)
 		self.moveDown()
 		self.txt.removeLastChars(2)
@@ -213,13 +214,17 @@ def printLst():
 		print(lst[x].id)
 root = Tk()
 lst = []
-mouse = Scrolling_Area(root)
-mouse.grid(row = 0, column = 999)
-bob  = PythonApplication2(root,0,0,"","1")
+mainCanvas = Canvas(root, background = 'greenyellow')# there are still methods that have master in them which we will not use anymore
+mainCanvas.pack(side = LEFT)
+sideFrame = Canvas(root, background = 'snow')
+sideFrame.pack(side = RIGHT)
+vsb = Scrollbar(sideFrame, orient="vertical",command=mainCanvas.yview)
+vsb.pack(side = RIGHT)
+mainCanvas.configure(yscrollcommand=vsb.set)	
+bob  = PythonApplication2(mainCanvas,0,0,"","1")
 lst.append(bob)
 gui = borderButtons(root)
 addOpenFile(root)
-#bob.bothButtons()
 root.mainloop()
 #so here are some actual problems i'll be attempting to save
 #i'll be attempting to save it so that it is exactly the same
