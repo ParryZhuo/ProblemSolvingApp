@@ -1,4 +1,4 @@
-from tkinter import*
+import tkinter as tk
 import operator
 from settings import storeObject
 from borderButtons import borderButtons
@@ -31,7 +31,7 @@ class PythonApplication2:
 		nlines = (nlines * 25)+25
 		nWidth = word.split("\n")
 		maxLineLength = findMaxLine(nWidth)
-		self.txt = AutoResizedText(self.master, family="Arial",size=15, width = maxLineLength , height = nlines) #how to make int go by characters or something similar
+		self.txt = AutoResizedText(frame, family="Arial",size=15, width = maxLineLength , height = nlines) #how to make int go by characters or something similar
 		# scrollbar = scrollbar(master,command = test._textarea)
 		self.txt.grid(row = self.height, column = self.width)
 		self.txt.insert(word)
@@ -42,7 +42,7 @@ class PythonApplication2:
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def insertText(self,):#insert word into Text
-		self.txt = AutoResizedText(self.master, family="Arial",size=15, width = maxLineLength , height = nlines)
+		self.txt = tk.AutoResizedText(frame, family="Arial",size=15, width = maxLineLength , height = nlines)
 		self.txt.grid(row = self.height, column = self.width)
 	def saveButton(self,bob):
 		try: # if there is something in temp, we insert txt into settings.py
@@ -54,8 +54,8 @@ class PythonApplication2:
 			temp = bob
 	def mButton(self,height,width,colour,master): #when button is pressed, compresses or expands all the buttons that are underneath it
 		self.colour = "yellow"
-		self.middleB = Button(self.master,bg = "yellow", width = 1,command = lambda: self.toggle_txt(self.master))
-		self.middleB.grid(row = self.height, column = self.width+1,sticky = W)
+		self.middleB = tk.Button(frame,bg = "yellow", width = 1,command = lambda: self.toggle_txt(self.master))
+		self.middleB.grid(row = self.height, column = self.width+1,sticky = "w")
 	def toggle_txt(self,master):#yeah, so we
 		subGoalId = self.id + "0"
 		subGoalCompare = conversion(subGoalId)
@@ -74,8 +74,8 @@ class PythonApplication2:
 			for x in range(0,len(subGoalLst)):	
 				currentId=conversion(lst[subGoalLst[x]].id)
 				if currentId >= subGoalCompare:
-					lst[subGoalLst[x]].txtBox(self.master,lst[subGoalLst[x]].word)
-					lst[subGoalLst[x]].mButton(0,0,"yellow",self.master)
+					lst[subGoalLst[x]].tk.txtBox(frame,lst[subGoalLst[x]].word)
+					lst[subGoalLst[x]].tk.mButton(0,0,"yellow",self.master)
 					self.colour = "yellow"
 					self.middleB.configure(bg = self.colour)
 
@@ -84,7 +84,7 @@ class PythonApplication2:
 		temp = self.word[0:len(self.word)-1]
 		temp = conversion(self.id)+1
 		temp = conversion(temp)
-		bob  = PythonApplication2(self.master,self.height+1,self.width,"",temp)#an appended id)
+		bob  = PythonApplication2(frame,self.height+1,self.width,"",temp)#an appended id)
 		
 		lst.append(bob)
 		self.moveDown()
@@ -212,19 +212,28 @@ def findMaxLine(myList):
 def printLst():
 	for x in range(0,len[lst]):
 		print(lst[x].id)
-root = Tk()
+def onFrameConfigure(canvas):
+    '''Reset the scroll region to encompass the inner frame'''
+    canvas.configure(scrollregion=canvas.bbox("all"))
+root = tk.Tk()
+root.geometry("800x800")
 lst = []
-mainCanvas = Canvas(root, background = 'greenyellow')# there are still methods that have master in them which we will not use anymore
-mainCanvas.pack(side = LEFT)
-sideFrame = Canvas(root, background = 'snow')
-sideFrame.pack(side = RIGHT)
-vsb = Scrollbar(sideFrame, orient="vertical",command=mainCanvas.yview)
-vsb.pack(side = RIGHT)
-mainCanvas.configure(yscrollcommand=vsb.set)	
+mainCanvas = tk.Canvas(root, background = 'greenyellow')# there are still methods that have master in them which we will not use anymore
+mainCanvas.pack(side = "left", fill="both", expand=True)
+# sideFrame = tk.Canvas(root, background = 'snow')
+# sideFrame.pack(side = "right")
+frame = tk.Frame(mainCanvas, background="#ffffff")
+vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
+vsb.pack(side = "right",fill="y")
+hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
+hsb.pack(side = "bottom",fill="x")
+mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set)	
+mainCanvas.create_window((12,12), window=frame, anchor="nw")
+frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 bob  = PythonApplication2(mainCanvas,0,0,"","1")
 lst.append(bob)
-gui = borderButtons(root)
-addOpenFile(root)
+# gui = borderButtons(root)
+# addOpenFile(root)
 root.mainloop()
 #so here are some actual problems i'll be attempting to save
 #i'll be attempting to save it so that it is exactly the same
