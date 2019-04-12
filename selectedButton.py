@@ -216,24 +216,25 @@ def onFrameConfigure(canvas):
     '''Reset the scroll region to encompass the inner frame'''
     canvas.configure(scrollregion=canvas.bbox("all"))
 root = tk.Tk()
-root.geometry("800x800")
 lst = []
 mainCanvas = tk.Canvas(root, background = 'greenyellow')# there are still methods that have master in them which we will not use anymore
-mainCanvas.pack(side = "left", fill="both", expand=True)
+mainCanvas.grid(row = 0,column = 0,sticky = "ew")
 # sideFrame = tk.Canvas(root, background = 'snow')
 # sideFrame.pack(side = "right")
 frame = tk.Frame(mainCanvas, background="#ffffff")
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
-vsb.pack(side = "right",fill="y")
+vsb.grid(column = 1,row = 0,sticky = "news")
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
-hsb.pack(side = "bottom",fill="x")
-mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set)	
+hsb.grid(column=0,row = 1,sticky = "ew")
+vsb.rowconfigure(0, weight=1)
+hsb.columnconfigure(0, weight=1)
+mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1200)	
 mainCanvas.create_window((12,12), window=frame, anchor="nw")
 frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 bob  = PythonApplication2(mainCanvas,0,0,"","1")
 lst.append(bob)
-# gui = borderButtons(root)
-# addOpenFile(root)
+gui = borderButtons(root)
+addOpenFile(root)
 root.mainloop()
 #so here are some actual problems i'll be attempting to save
 #i'll be attempting to save it so that it is exactly the same
