@@ -83,23 +83,20 @@ class PythonApplication2:
 					self.colour = "yellow"
 					self.middleB.configure(bg = self.colour)
 
-	def lAppendArr(self,cow):
+	def lAppendArr(self,cow): # this is for siblings
 		ArrWidth =int(self.width/2)
 		temp = self.word[0:len(self.word)-1]
-		temp = conversion(self.id)+1
+		temp += chr(ord(self.id[-1])+1)
 		temp = conversion(temp)
 		bob  = PythonApplication2(self.master,self.height+1,self.width,"",temp)#an appended id)
 		
 		lst.append(bob)
 		self.moveDown()
 						 
-	def rAppendArr(self,cow):
-
-		# case 1. There is one directly underneath; appends underneath all the buttons underneath directly
-		# we simply move everything underneath by 1, and append it normally
-		findThis = conversion(self.id)+1
+	def rAppendArr(self,cow):#this is for children
+		# findThis = conversion(self.id)+1
 	#	orThis
-		temp =self.id + "0"
+		temp =self.id + chr(0x00)
 		self.word = self.word[0:len(self.word)-2]
 		bob = PythonApplication2(self.master,self.height+1, self.width+2,"",temp)
 		lst.append(bob)
@@ -132,11 +129,12 @@ def openTheFile(master):
 	with open(file) as f:
 		content = f.readlines()
 		content = [x.strip() for x in content]
-	for x in range(0,len(content)):
-		line = content[x]
-		bobData = line.split("~||LOVE||!@#")
-		bobData[0] = int(conversion(bobData[0]))#HOLDS POSITION
-		bobData[1] = int(conversion(bobData[1]))
+	for x in content:
+		# line = content[x]
+		bobData = x.split("~||LOVE||!@#")
+		print(x)
+		bobData[0] = hex(conversion(bobData[0]))#HOLDS POSITION
+		bobData[1] = hex(conversion(bobData[1]))
 		temp = str(bobData[3])#holds id
 		putIntoLines = bobData[2].replace("|/|Enjoy","\n") #HOLDS THE WORD
 		bob = PythonApplication2(master,bobData[0],bobData[1],putIntoLines,temp)
@@ -214,22 +212,24 @@ def onFrameConfigure(canvas):
     canvas.configure(scrollregion=canvas.bbox("all"))
 def _on_mousewheel(event):
     mainCanvas.yview_scroll(-1*(int)(event.delta/120), "units")
+def initializeScollbar():
+	mainCanvas.grid(row = 0,column = 0,sticky = "ew")
+	mainCanvas.bind_all("<MouseWheel>", _on_mousewheel)
+	vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
+	vsb.grid(column = 1,row = 0,sticky = "news")
+	hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
+	hsb.grid(column=0,row = 1,sticky = "ew")
+	vsb.rowconfigure(0, weight=1)
+	hsb.columnconfigure(0, weight=1)
+	mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1400)	
+	mainCanvas.create_window((12,12), window=frame, anchor="nw")
+	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 root = tk.Tk()
 lst = []
 mainCanvas = tk.Canvas(root, background = 'gray30')# there are still methods that have master in them which we will not use anymore
-mainCanvas.grid(row = 0,column = 0,sticky = "ew")
-mainCanvas.bind_all("<MouseWheel>", _on_mousewheel)
 frame = tk.Frame(mainCanvas, background="gray30")
-vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
-vsb.grid(column = 1,row = 0,sticky = "news")
-hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
-hsb.grid(column=0,row = 1,sticky = "ew")
-vsb.rowconfigure(0, weight=1)
-hsb.columnconfigure(0, weight=1)
-mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1400)	
-mainCanvas.create_window((12,12), window=frame, anchor="nw")
-frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
-bob  = PythonApplication2(frame,0,0,"","1")
+initializeScollbar()
+bob  = PythonApplication2(frame,0,0,"",chr(0x01))
 lst.append(bob)
 gui = borderButtons(root)
 addOpenFile(frame)
