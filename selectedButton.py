@@ -1,38 +1,28 @@
 import tkinter as tk
 from tkinter import *
 import operator
+from Node import Node
 from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
 # from MouseWheel import Scrolling_Area
 # from borderButtons import borderButtons
-# lst = []
-
-# save function doesn't work that well, doesn't save twice - DONEEEEEEEEEEEEEE
-#save function doesn't take into account the width of the word.
-# we need to make textbox work take into account of width of word
-#id digits only work up till 10
-
 class PythonApplication2:
-	def __init__(self, master,height,width,word,id):
+	def __init__(self, master,height,width,word,curr):
 		self.master = master
+		self.curr = curr
 		self.width=width
 		self.height=height
 		self.word = word
 		self.txtBox(word)
 		self.mButton(0,0,"yellow")
-		self.id = id
-	#so one thing I remembered was that my arrays are not changing as my buttons change.
-		#what's the difference between left button and right button which make it so hard to delete?
-			#well what's changing is the width of the next instance
-			#way the list is being appended lBut appends within the [width][here], meanwhile right appends [here][]
-			#when destroying our object we are calling using the width of the button we pressed.
+
 	def txtBox(self,word):
 		nlines = word.count('\n')
 		nlines = (nlines * 25)+25
 		nWidth = word.split("\n")
 		maxLineLength = findMaxLine(nWidth)
-		self.txt = AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40",foreground= "coral") #how to make int go by characters or something similar
+		self.txt = AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40") #how to make int go by characters or something similar
 		# scrollbar = scrollbar(master,command = test._textarea)
 		self.txt.grid(row = self.height, column = self.width)
 		self.txt.insert(word)
@@ -43,7 +33,7 @@ class PythonApplication2:
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def insertText(self):#insert word into Text
-		self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40",foreground = "coral")
+		self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40")
 		self.txt.grid(row = self.height, column = self.width)
 	def saveButton(self,bob):
 		try: # if there is something in temp, we insert txt into settings.py
@@ -53,13 +43,12 @@ class PythonApplication2:
 				a.changeTxt(foundIdLoc , bob.txt.get("1.0",END))
 		except:#if there's nothing in temp, we just put that into bob
 			temp = bob
-	# def deleteButton(self,bob): #deletes the button that the curser is currently on
-		#1. we need to find the button
-		#2. we need to shift all the ids
+
 	def mButton(self,height,width,colour): #when button is pressed, compresses or expands all the buttons that are underneath it
 		self.colour = "yellow"
 		self.middleB = tk.Button(self.master,bg = "coral", width = 1,command = lambda: self.toggle_txt)
 		self.middleB.grid(row = self.height, column = self.width+1,sticky = "w")
+
 	def toggle_txt(self):#yeah, so we
 		subGoalId = self.id + "0"
 		subGoalCompare = conversion(subGoalId)
@@ -83,27 +72,24 @@ class PythonApplication2:
 					self.colour = "yellow"
 					self.middleB.configure(bg = self.colour)
 
-	def lAppendArr(self,cow): # this is for siblings
+	def lAppendArr(self,cow):
+		temp = self.txt.get("1.0",END)
+		self.curr.insertWord(temp)
+		print("before "+self.curr.word)
 		ArrWidth =int(self.width/2)
-		temp = self.word[0:len(self.word)-1]
-		temp += chr(ord(self.id[-1])+1)
-		temp = conversion(temp)
-		bob  = PythonApplication2(self.master,self.height+1,self.width,"",temp)#an appended id)
-		
-		lst.append(bob)
-		self.moveDown()
-						 
-	def rAppendArr(self,cow):#this is for children
-		# findThis = conversion(self.id)+1
-	#	orThis
-		temp =self.id + chr(0x00)
+		newNode = insertSibling(self.curr)
+		count = Node.countChildren(self.curr)+2
+		print("count" + str(count))
+		bob  = PythonApplication2(self.master,self.height+count,self.width,"",newNode)#an appended id)
+
+	def rAppendArr(self,cow):
+		temp = self.txt.get("1.0",END)
+		self.curr.insertWord(temp)
+		# print("before self.curr "+self.curr.word)
 		self.word = self.word[0:len(self.word)-2]
-		bob = PythonApplication2(self.master,self.height+1, self.width+2,"",temp)
-		lst.append(bob)
-		self.moveDown()
-		self.txt.removeLastChars(2)
-		#case 2, there's one diagonally
-		#case 3, there's no next button underneath
+		newNode = insertChild(self.curr)
+		bob = PythonApplication2(self.master,self.height+1, self.width+1,"",newNode)
+
 	def moveDown(self):#moves all elements underneath the self.id
 		sortedList = sortButtons() # use this to match id to x
 		for x in range(0,len(lst)):
@@ -113,47 +99,48 @@ class PythonApplication2:
 			lst[sortedList[x][1]].height = x #[x][1] is looking at the x'th element and the items in the dictionary is [1]
 			lst[sortedList[x][1]].txt.grid_configure(row = x, column = lst[sortedList[x][1]].width)
 			lst[sortedList[x][1]].middleB.grid_configure(row = x, column = lst[sortedList[x][1]].width+1)
-			
-		# increaseId = findWidthId(self.id)
-		# for x in range(0,len(increaseId)):
-		# 	temp = conversion(lst[increaseId[x]].id)+1  # problem is here, is possibly, it's searching for all elements.
-		# 	lst[x].id = temp
-def addOpenFile(master):
-	gui.subMenu.add_command(label = "save", command = save)
+
+def addOpenFile(master,head):
+	gui.subMenu.add_command(label = "save", command = save(head))
 	gui.subMenu.add_command(label = "Open", command = lambda: createEmptyLst(master))
 def createEmptyLst(master):
 	lst.clear()
 	openTheFile(master)
+
 def openTheFile(master):
 	file = "csc225Exam.txt" 
 	with open(file) as f:
 		content = f.readlines()
 		content = [x.strip() for x in content]
-	for x in content:
-		# line = content[x]
-		bobData = x.split("~||LOVE||!@#")
-		print(x)
-		bobData[0] = hex(conversion(bobData[0]))#HOLDS POSITION
-		bobData[1] = hex(conversion(bobData[1]))
+	for x in range(0,len(content)):
+		line = content[x]
+		bobData = line.split("<|?s?|>")
+		bobData[0] = int(conversion(bobData[0]))#HOLDS POSITION
+		bobData[1] = int(conversion(bobData[1]))
 		temp = str(bobData[3])#holds id
-		putIntoLines = bobData[2].replace("|/|Enjoy","\n") #HOLDS THE WORD
+		putIntoLines = bobData[2].replace("<|/n|>","\n") #HOLDS THE WORD
 		bob = PythonApplication2(master,bobData[0],bobData[1],putIntoLines,temp)
 		lst.append(bob)
 	printLst(lst)
 	print("this is length of lst: " + str(len(lst)))
 
-def save():
-	file = open("csc225Exam.txt", "w+")
-	for x in range(0,len(lst)):#height,width,word,id - order of object6
-		lst[x].word = lst[x].txt.get("1.0",END)
-		putInALine = lst[x].word.replace("\n","|/|Enjoy") #pu6s next lines as !@#
-		file.write( str(lst[x].height) + "~||LOVE||!@#"  + str(lst[x].width) + "~||LOVE||!@#" + putInALine+"~||LOVE||!@#" + str(lst[x].id) + "\n")
-		print("this is length of lst: " + str(len(lst)))
-	file.close()
+def save(head):
+	file = open("daily.txt", "w+")
+	stack = []
+	stack.append(head)
+	move = head
+	while stack:
+		move =stack.pop(0)
+		print("this is in save " + move.word)
+		putInALine = move.word.replace("\n","<|/n|>") 
 
-# def organizeId():#finds any holes within the lst caused by deleting a txtbox; and changes all ids to fit it accurately
-# 	for x in lst:
-		
+		file.write( str(move.height) + " <|?s?|> "  + str(move.width) + " <|?s?|> " + putInALine+ " <|?s?|> " + "\n")
+		if move.child is not None: # 
+			stack.append(move.child)
+		elif move.sibling is not None:
+			stack.append(move.sibling)
+
+	file.close()
 
 def sortButtons():
 	temp = {}
@@ -204,14 +191,18 @@ def findMaxLine(myList):
 		return int(myList[0])
 	except ValueError:
 		return 100
+
 def printLst(lst):
 	for x in range(0,len(lst)):
 		print(lst[x].id)
+
 def onFrameConfigure(canvas):
-    '''Reset the scroll region to encompass the inner frame'''
-    canvas.configure(scrollregion=canvas.bbox("all"))
+	'''Reset the scroll region to encompass the inner frame'''
+	canvas.configure(scrollregion=canvas.bbox("all"))
+
 def _on_mousewheel(event):
-    mainCanvas.yview_scroll(-1*(int)(event.delta/120), "units")
+	mainCanvas.yview_scroll(-1*(int)(event.delta/120), "units")
+
 def initializeScollbar():
 	mainCanvas.grid(row = 0,column = 0,sticky = "ew")
 	mainCanvas.bind_all("<MouseWheel>", _on_mousewheel)
@@ -224,13 +215,34 @@ def initializeScollbar():
 	mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1400)	
 	mainCanvas.create_window((12,12), window=frame, anchor="nw")
 	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
+
+def insertSibling(prevNode):
+	count = Node.countChildren(prevNode)+1
+	print("\n" + str(count))
+	prevNode.sibling = Node(prevNode.height+count,prevNode.width,parents = prevNode)	
+	return prevNode.sibling
+
+def insertChild(prevNode):
+	temp = prevNode
+	prevNode.child = Node(prevNode.height+1,prevNode.width+1,parents = temp)
+	return prevNode.child
+
+def delete(self):
+	self.parents.child = None
+
+def printLinked(head):
+	print(str(head.height) + " " + str(head.width))
+	if head.child is not None:
+		printLinked(head.child)
+	if head.sibling is not None:
+		printLinked(head.sibling)
+
 root = tk.Tk()
-lst = []
 mainCanvas = tk.Canvas(root, background = 'gray30')# there are still methods that have master in them which we will not use anymore
 frame = tk.Frame(mainCanvas, background="gray30")
 initializeScollbar()
-bob  = PythonApplication2(frame,0,0,"",chr(0x01))
-lst.append(bob)
+head = Node(height= 0,width=0)
+bob  = PythonApplication2(frame,0,0,"",head)
 gui = borderButtons(root)
-addOpenFile(frame)
+addOpenFile(frame,head)
 root.mainloop()
