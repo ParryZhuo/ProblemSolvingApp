@@ -1,16 +1,18 @@
 import tkinter as tk
-from tkinter import *
+# from tkinter import *
 import operator
-from Node import Node
+# from Node import Node
 from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
 # from MouseWheel import Scrolling_Area
 # from borderButtons import borderButtons
 class PythonApplication2:
-	def __init__(self, master,height,width,word,curr):
+	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
 		self.master = master
-		self.curr = curr
+		self.child = child
+		self.parent = parent
+		self.sibling = sibling
 		self.width=width
 		self.height=height
 		self.word = word
@@ -28,8 +30,8 @@ class PythonApplication2:
 		self.txt.insert(word)
 		self.txt._fit_to_size_of_text(word)
 		self.txt.focus_set()
-		self.txt.bind("<Tab>", self.rAppendArr)
-		self.txt.bind("<Shift-Return>", self.lAppendArr)
+		self.txt.bind("<Tab>", self.insertChild)
+		self.txt.bind("<Shift-Return>", self.insertSibling)
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def insertText(self):#insert word into Text
@@ -70,35 +72,31 @@ class PythonApplication2:
 					lst[subGoalLst[x]].tk.txtBox(self.master,lst[subGoalLst[x]].word)
 					lst[subGoalLst[x]].tk.mButton(0,0,"blue",self.master)
 					self.colour = "yellow"
-					self.middleB.configure(bg = self.colour)
+					self.middleB.configure(bg = self.colour)	
 
-	def lAppendArr(self,cow):
-		temp = self.txt.get("1.0",END)
-		self.curr.insertWord(temp)
-		print("before "+self.curr.word)
-		ArrWidth =int(self.width/2)
-		newNode = insertSibling(self.curr)
-		count = Node.countChildren(self.curr)+2
-		print("count" + str(count))
-		bob  = PythonApplication2(self.master,self.height+count,self.width,"",newNode)#an appended id)
+	def moveDown(self):
+		curr = self
+		while curr.parent is not None:
+			curr = curr.parent
+		sortButtons(curr,0,0)
 
-	def rAppendArr(self,cow):
-		temp = self.txt.get("1.0",END)
-		self.curr.insertWord(temp)
-		# print("before self.curr "+self.curr.word)
-		self.word = self.word[0:len(self.word)-2]
-		newNode = insertChild(self.curr)
-		bob = PythonApplication2(self.master,self.height+1, self.width+1,"",newNode)
+	def insertSibling(self,cow):
+		bob = PythonApplication2(self.master,self.height+1,self.width,parent = self.parent)
+		self.sibling = bob
+		findParent= self
+		if self.height == 0:#deals with case of heads siblings.
+			bob.parent = self
+		while findParent.parent is not None:
+			findParent = findParent.parent
+		sortButtons(findParent,0,0)
 
-	def moveDown(self):#moves all elements underneath the self.id
-		sortedList = sortButtons() # use this to match id to x
-		for x in range(0,len(lst)):
-			print("\n")
-		for x in range(0,len(lst)):
-			# print(sortedList[x][1])
-			lst[sortedList[x][1]].height = x #[x][1] is looking at the x'th element and the items in the dictionary is [1]
-			lst[sortedList[x][1]].txt.grid_configure(row = x, column = lst[sortedList[x][1]].width)
-			lst[sortedList[x][1]].middleB.grid_configure(row = x, column = lst[sortedList[x][1]].width+1)
+	def insertChild(self,cow):
+		bob = PythonApplication2(self.master,self.height+1,self.width+1,parent = self)
+		self.child = bob
+		findParent = self
+		while findParent.parent is not None:
+			findParent = findParent.parent
+		sortButtons(findParent,0,0)#what's the purpose of this? Well looks through all the buttons EVERY SINGLE ONE. Determines the num of descendents then can you  you know.
 
 def addOpenFile(master,head):
 	gui.subMenu.add_command(label = "save", command = save(head))
@@ -133,21 +131,25 @@ def save(head):
 		move =stack.pop(0)
 		print("this is in save " + move.word)
 		putInALine = move.word.replace("\n","<|/n|>") 
-
 		file.write( str(move.height) + " <|?s?|> "  + str(move.width) + " <|?s?|> " + putInALine+ " <|?s?|> " + "\n")
 		if move.child is not None: # 
 			stack.append(move.child)
 		elif move.sibling is not None:
 			stack.append(move.sibling)
-
 	file.close()
 
-def sortButtons():
-	temp = {}
-	for x in range(0,len(lst)): 
-		temp[lst[x].id] = x
-	sorted_x = sorted(temp.items(), key=operator.itemgetter(0))
-	return sorted_x	
+def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
+	print(str(height) + " " + str(width))
+	if curr.child is not None:
+		sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
+	if curr.sibling is not None:
+		temp1=countChildren(curr)+1
+		sortButtons(curr.sibling,height+temp1,width)
+
+	curr.height = height
+	curr.width = width
+	curr.txt.grid_configure(row = height, column = width)
+	curr.middleB.grid_configure(row = height, column = width+1)
 
 def searchForIdLoc(findId): #goes through entire array searching for a specific id. Returns the location in lst
 	for x in range(0,len(a.retLst)):													# returns false if it's in list
@@ -216,17 +218,6 @@ def initializeScollbar():
 	mainCanvas.create_window((12,12), window=frame, anchor="nw")
 	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 
-def insertSibling(prevNode):
-	count = Node.countChildren(prevNode)+1
-	print("\n" + str(count))
-	prevNode.sibling = Node(prevNode.height+count,prevNode.width,parents = prevNode)	
-	return prevNode.sibling
-
-def insertChild(prevNode):
-	temp = prevNode
-	prevNode.child = Node(prevNode.height+1,prevNode.width+1,parents = temp)
-	return prevNode.child
-
 def delete(self):
 	self.parents.child = None
 
@@ -236,13 +227,31 @@ def printLinked(head):
 		printLinked(head.child)
 	if head.sibling is not None:
 		printLinked(head.sibling)
+def countChildren(curr):#looks at relatives that are either same level(siblings) or descendents 
+	count = 0
+	stack = []
+	if curr.child is not None:
+		count+=1
+		stack.append(curr.child)
+	# if curr.sibling is not None:
+	# 	count+=1
+	# 	stack.append(curr.sibling)
+	while stack:#uses dfs
+		noder = stack.pop(0)
+		if noder.child is not None:
+			stack.append(noder.child)
+			count+=1
+		if noder.sibling is not None:
+			stack.append(noder.sibling)
+			count+=1
+	print("count : " + str(count))	
+	return count
 
 root = tk.Tk()
 mainCanvas = tk.Canvas(root, background = 'gray30')# there are still methods that have master in them which we will not use anymore
 frame = tk.Frame(mainCanvas, background="gray30")
 initializeScollbar()
-head = Node(height= 0,width=0)
-bob  = PythonApplication2(frame,0,0,"",head)
+head  = PythonApplication2(frame,0,0)
 gui = borderButtons(root)
 addOpenFile(frame,head)
 root.mainloop()
