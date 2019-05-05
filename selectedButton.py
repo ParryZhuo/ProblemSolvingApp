@@ -98,12 +98,12 @@ class object:
 		deleteThis = []
 		findParent = self
 		curr = self
-		while findParent.parent is not None:
-			findParent = findParent.parent
 		self.middleB.grid_forget()
 		self.txt.grid_forget()
 		if(self.sibling is not None):
 			self.parent.child = self.sibling
+		else:
+			self.parent.child = None
 		if(self.child is not None):
 			deleteThis.append(self.child)
 			curr = self.child
@@ -116,7 +116,8 @@ class object:
 			if(curr.sibling is not None):
 				deleteThis.append(curr.sibling)
 			curr = None
-		# sortButtons(findParent,0,0)
+		print(head.height)
+		sortButtons(head,0,0)
 def addOpenFile(master,head):
 	gui.subMenu.add_command(label = "save", command = save)
 	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
@@ -198,30 +199,6 @@ def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usual
 	curr.txt.grid_configure(row = height, column = width)
 	curr.middleB.grid_configure(row = height, column = width+1)
 
-def searchForIdLoc(findId): #goes through entire array searching for a specific id. Returns the location in lst
-	for x in range(0,len(a.retLst)):													# returns false if it's in list
-		temp  = conversion(a.retId(x))	
-		if findId == temp:
-			return x
-	return 0
-
-def findWidthId(findId):#this returns all the id's with a given width. Returned in an list
-	arrLocations = []
-	for x in range(0,len(lst)):
-		#criteria for being in the same row is same length, and same characters up till len-1
-		if(len(findId)==len(lst[x].id)):
-			if(findId[0:len(findId)-1] == lst[x].id[0:len(lst[x].id)-1]):
-				if(findId[len(findId)-1]) <= lst[x].id[len(lst[x].id)-1]:
-					arrLocations.append(x)
-	return arrLocations
-def findMYCHILDRENPLEASE(findId):#this returns all the id's with a given width. Returned in an list
-	arrLocations = []
-	for x in range(0,len(lst)):
-		#criteria for being a child is, and same characters up till len-1
-		if(findId[0:len(findId)-1] == lst[x].id[0:len(findId)-1]):
-			if(findId[len(findId)-1]) <= lst[x].id[0:len(findId)-1]:
-				arrLocations.append(x)
-	return arrLocations					 
 
 def conversion(converting):#this method converts string to int, or int to string
 	try:
@@ -240,10 +217,6 @@ def findMaxLine(myList):
 		return int(myList[0])
 	except ValueError:
 		return 100
-
-def printLst(lst):
-	for x in range(0,len(lst)):
-		print(lst[x].id)
 
 def onFrameConfigure(canvas):
 	'''Reset the scroll region to encompass the inner frame'''
