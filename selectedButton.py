@@ -1,13 +1,12 @@
 import tkinter as tk
-# from tkinter import *
 import operator
-# from Node import Node
+import json
 from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
-# from MouseWheel import Scrolling_Area
-# from borderButtons import borderButtons
-class PythonApplication2:
+import copy
+
+class object:
 	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
 		self.master = master
 		self.child = child
@@ -18,7 +17,6 @@ class PythonApplication2:
 		self.word = word
 		self.txtBox(word)
 		self.mButton(0,0,"yellow")
-
 	def txtBox(self,word):
 		nlines = word.count('\n')
 		nlines = (nlines * 25)+25
@@ -32,6 +30,7 @@ class PythonApplication2:
 		self.txt.focus_set()
 		self.txt.bind("<Tab>", self.insertChild)
 		self.txt.bind("<Shift-Return>", self.insertSibling)
+		self.txt.bind("<Shift-Delete>",self.deleteSelf)
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def insertText(self):#insert word into Text
@@ -81,65 +80,113 @@ class PythonApplication2:
 		sortButtons(curr,0,0)
 
 	def insertSibling(self,cow):
-		bob = PythonApplication2(self.master,self.height+1,self.width,parent = self.parent)
+		bob = object(self.master,self.height+1,self.width,parent = self)
 		self.sibling = bob
 		findParent= self
-		if self.height == 0:#deals with case of heads siblings.
-			bob.parent = self
-		while findParent.parent is not None:
+		while findParent.parent is not None:#I don't call the global "head" just incase head is referenced to another canvas or something
 			findParent = findParent.parent
 		sortButtons(findParent,0,0)
 
 	def insertChild(self,cow):
-		bob = PythonApplication2(self.master,self.height+1,self.width+1,parent = self)
+		bob = object(self.master,self.height+1,self.width+1,parent = self)
 		self.child = bob
 		findParent = self
 		while findParent.parent is not None:
 			findParent = findParent.parent
 		sortButtons(findParent,0,0)#what's the purpose of this? Well looks through all the buttons EVERY SINGLE ONE. Determines the num of descendents then can you  you know.
-
+	def deleteSelf(self,cow):
+		deleteThis = []
+		findParent = self
+		curr = self
+		while findParent.parent is not None:
+			findParent = findParent.parent
+		self.middleB.grid_forget()
+		self.txt.grid_forget()
+		if(self.sibling is not None):
+			self.parent.child = self.sibling
+		if(self.child is not None):
+			deleteThis.append(self.child)
+			curr = self.child
+		while deleteThis:
+			curr = deleteThis.pop(0)
+			curr.middleB.grid_forget()
+			curr.txt.grid_forget()
+			if(curr.child is not None):
+				deleteThis.append(curr.child)
+			if(curr.sibling is not None):
+				deleteThis.append(curr.sibling)
+			curr = None
+		# sortButtons(findParent,0,0)
 def addOpenFile(master,head):
-	gui.subMenu.add_command(label = "save", command = save(head))
-	gui.subMenu.add_command(label = "Open", command = lambda: createEmptyLst(master))
-def createEmptyLst(master):
-	lst.clear()
-	openTheFile(master)
-
-def openTheFile(master):
-	file = "csc225Exam.txt" 
-	with open(file) as f:
-		content = f.readlines()
-		content = [x.strip() for x in content]
-	for x in range(0,len(content)):
-		line = content[x]
-		bobData = line.split("<|?s?|>")
-		bobData[0] = int(conversion(bobData[0]))#HOLDS POSITION
-		bobData[1] = int(conversion(bobData[1]))
-		temp = str(bobData[3])#holds id
-		putIntoLines = bobData[2].replace("<|/n|>","\n") #HOLDS THE WORD
-		bob = PythonApplication2(master,bobData[0],bobData[1],putIntoLines,temp)
-		lst.append(bob)
-	printLst(lst)
-	print("this is length of lst: " + str(len(lst)))
-
-def save(head):
-	file = open("daily.txt", "w+")
-	stack = []
+	gui.subMenu.add_command(label = "save", command = save)
+	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
+def insertNode(height,width):#inserts node into correct spot on tree given height and width
+	global head
+	#bfs search
 	stack.append(head)
-	move = head
 	while stack:
-		move =stack.pop(0)
-		print("this is in save " + move.word)
-		putInALine = move.word.replace("\n","<|/n|>") 
-		file.write( str(move.height) + " <|?s?|> "  + str(move.width) + " <|?s?|> " + putInALine+ " <|?s?|> " + "\n")
-		if move.child is not None: # 
-			stack.append(move.child)
-		elif move.sibling is not None:
-			stack.append(move.sibling)
-	file.close()
+		curr = stack.pop(0)
 
+		if((curr.child is not None) and (curr.child.height <=height) and (curr.child.width <=width)):
+			stack.append(curr.child)
+		if((curr.sibling is not None) and (curr.sibling.height <=height) and (curr.sibling.width <=width)):
+			stack.append(curr.sibling)
+def ancestor(curr,deltaW):
+	for x in range(0,deltaW):
+		curr = curr.parent
+	return curr
+def openTheFile(master):
+	print("cow")
+	with open(globFile) as json_file:  
+		data = json.load(json_file)
+		global head
+		head = object(master,data[0]["height"],data[0]["width"],data[0]["word"])
+		curr = head
+		descendentCounter = 0
+		for index in range(1,len(data)):
+			if((curr.height+1 == data[index]["height"]) and (curr.width+1==data[index]["width"])):#if the next node is a child to curr
+				bob = object(master,data[index]["height"],data[index]["width"],data[index]["word"],parent = curr)
+				curr.child = bob
+				curr = curr.child
+			else:#it's a sibling to someone
+				deltaW = curr.width - data[index]["width"]
+				curr = ancestor(curr,deltaW)
+				bob = object(master,data[index]["height"],data[index]["width"],data[index]["word"],parent = curr)
+				curr.sibling = bob
+			# else: # if the next node not a direct family member of curr
+
+				
+		#we need to determine if it's a child, a sibling, or someone elses direct family.
+def traverse(curr,diction):#sorts in preorder(except reveresed sides)
+	# if((curr.child is None) and (curr.sibling is None) and (curr is not None)):#deals with the end of a tree branch
+	# 	diction.append({"height": curr.height,"width": curr.width, "word": curr.word})
+
+	if(curr.child is not None):
+		word= curr.child.txt.get("1.0",tk.END)
+		diction.append({"height": curr.child.height,"width": curr.child.width, "word": word})
+		traverse(curr.child,diction)
+	if(curr.sibling is not None):
+		word= curr.sibling.txt.get("1.0",tk.END)
+		diction.append({"height": curr.sibling.height,"width": curr.sibling.width, "word": word})
+		traverse(curr.sibling,diction)
+	return diction
+
+
+def save():
+	file = open(globFile, "w+")
+	global head
+	copyOfT = copy.copy(head)#copies the entire tree onto copyOfT
+	curr = copyOfT
+	diction = {}
+	diction["bob"]= []
+	curr.word = head.txt.get("1.0",tk.END)
+	diction["bob"].append({"height": curr.height,"width": curr.width, "word": curr.word})
+	hold = traverse(curr,diction["bob"])
+	json.dump(hold,file,indent = 4)
+	file.close()	
+	
 def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
-	print(str(height) + " " + str(width))
+	# print(str(height) + " " + str(width))
 	if curr.child is not None:
 		sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
 	if curr.sibling is not None:
@@ -218,8 +265,7 @@ def initializeScollbar():
 	mainCanvas.create_window((12,12), window=frame, anchor="nw")
 	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 
-def delete(self):
-	self.parents.child = None
+
 
 def printLinked(head):
 	print(str(head.height) + " " + str(head.width))
@@ -244,14 +290,14 @@ def countChildren(curr):#looks at relatives that are either same level(siblings)
 		if noder.sibling is not None:
 			stack.append(noder.sibling)
 			count+=1
-	print("count : " + str(count))	
 	return count
 
 root = tk.Tk()
+globFile = "daily.txt"
 mainCanvas = tk.Canvas(root, background = 'gray30')# there are still methods that have master in them which we will not use anymore
 frame = tk.Frame(mainCanvas, background="gray30")
 initializeScollbar()
-head  = PythonApplication2(frame,0,0)
+head  = object(frame,0,0)
 gui = borderButtons(root)
 addOpenFile(frame,head)
 root.mainloop()
