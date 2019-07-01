@@ -1,11 +1,12 @@
 import tkinter as tk
 import operator
 import json
+# import pdb
 from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
 import copy
-
+#text.see() is helpful for future
 class object:
 	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
 		self.master = master
@@ -14,7 +15,7 @@ class object:
 		self.sibling = sibling
 		self.width=width
 		self.height=height
-		self.word = word
+		self.word = word.strip("\r\n")
 		self.txtBox(word)
 		self.mButton(0,0,"yellow")
 	def txtBox(self,word):
@@ -31,6 +32,8 @@ class object:
 		self.txt.bind("<Tab>", self.insertChild)
 		self.txt.bind("<Shift-Return>", self.insertSibling)
 		self.txt.bind("<Shift-Delete>",self.deleteSelf)
+		# self.txt.bind("<Shift>",lambda: test(90,90))
+		# self.txt.bind("<a>",lambda changeFocus: moveFocus(changeFocus))
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
 	def insertText(self):#insert word into Text
@@ -82,42 +85,54 @@ class object:
 	def insertSibling(self,cow):
 		bob = object(self.master,self.height+1,self.width,parent = self)
 		self.sibling = bob
-		findParent= self
-		while findParent.parent is not None:#I don't call the global "head" just incase head is referenced to another canvas or something
-			findParent = findParent.parent
-		sortButtons(findParent,0,0)
+		mainCanvas.yview_scroll(100, "units")
+		# findParent= self
+		# while findParent.parent is not None:#I don't call the global "head" just incase head is referenced to another canvas or something
+		# 	findParent = findParent.parent
+		sortButtons(head,0,0)
 
 	def insertChild(self,cow):
 		bob = object(self.master,self.height+1,self.width+1,parent = self)
 		self.child = bob
-		findParent = self
-		while findParent.parent is not None:
-			findParent = findParent.parent
-		sortButtons(findParent,0,0)#what's the purpose of this? Well looks through all the buttons EVERY SINGLE ONE. Determines the num of descendents then can you  you know.
-	def deleteSelf(self,cow):
+		# self.word = word.strip("\r\n")
+		distance = 100*(countChildren(self)+1)
+		mainCanvas.yview_scroll(distance, "units")
+		mainCanvas.xview_scroll(55, "units")
+		# findParent = self
+		# while findParent.parent is not None:
+		# 	findParent = findParent.parent
+		sortButtons(head,0,0)#what's the purpose of this? Well looks through all the buttons EVERY SINGLE ONE. Determines the num of descendents then can you  you know.
+	# def delete(self,node):
+		
+	def deleteSelf(self,cow):#deletes itself as well as all descendents of self
 		deleteThis = []
 		findParent = self
 		curr = self
-		self.middleB.grid_forget()
-		self.txt.grid_forget()
-		if(self.sibling is not None):
+		self.middleB.destroy()
+		self.txt.destroy()
+		# a bug we have is that the roots sibling cannot be deleted if it has children. Why is this the case? Because it's relation
+		# to the root is different than normel. So what needs to happen when we delete the node?
+		if(self.sibling is not None):#here we replace the link between the parent and the self with either none or it's sibling.
 			self.parent.child = self.sibling
 		else:
 			self.parent.child = None
-		if(self.child is not None):
+		if(self.child is not None):#here we are seeing if it has children so we can delete it and the rest of it's descendents using dfs
 			deleteThis.append(self.child)
-			curr = self.child
+			self.parent.child =None
+				
 		while deleteThis:
 			curr = deleteThis.pop(0)
-			curr.middleB.grid_forget()
-			curr.txt.grid_forget()
+			curr.middleB.destroy()
+			curr.txt.destroy()
 			if(curr.child is not None):
 				deleteThis.append(curr.child)
 			if(curr.sibling is not None):
 				deleteThis.append(curr.sibling)
-			curr = None
-		print(head.height)
+			curr = None # DELETES REFERENCE To child
+		printLinked(head)
+		print("\n\n")
 		sortButtons(head,0,0)
+
 def addOpenFile(master,head):
 	gui.subMenu.add_command(label = "save", command = save)
 	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
@@ -126,13 +141,13 @@ def insertNode(height,width):#inserts node into correct spot on tree given heigh
 	#bfs search
 	stack.append(head)
 	while stack:
-		curr = stack.pop(0)
+		curr = stack.pop(0) 
 
 		if((curr.child is not None) and (curr.child.height <=height) and (curr.child.width <=width)):
 			stack.append(curr.child)
 		if((curr.sibling is not None) and (curr.sibling.height <=height) and (curr.sibling.width <=width)):
 			stack.append(curr.sibling)
-def ancestor(curr,deltaW):
+def ancestor(curr,deltaW):#traverses up curr.parent deltaW times
 	for x in range(0,deltaW):
 		curr = curr.parent
 	return curr
@@ -141,7 +156,8 @@ def openTheFile(master):
 	with open(globFile) as json_file:  
 		data = json.load(json_file)
 		global head
-		head = object(master,data[0]["height"],data[0]["width"],data[0]["word"])
+		head = object(master,data[0]["height"],data[0]["width"],data[0]["word"][:-2])
+		
 		curr = head
 		descendentCounter = 0
 		for index in range(1,len(data)):
@@ -149,26 +165,28 @@ def openTheFile(master):
 				bob = object(master,data[index]["height"],data[index]["width"],data[index]["word"],parent = curr)
 				curr.child = bob
 				curr = curr.child
-			else:#it's a sibling to someone
+			elif(curr.width+1 != data[index]["width"]):#it's a sibling to someone
 				deltaW = curr.width - data[index]["width"]
+				print(deltaW)
 				curr = ancestor(curr,deltaW)
 				bob = object(master,data[index]["height"],data[index]["width"],data[index]["word"],parent = curr)
 				curr.sibling = bob
-			# else: # if the next node not a direct family member of curr
+				curr = curr.sibling
 
+			# else: # if the next node not a direct family member of curr
+	# printLinked(head)
 				
 		#we need to determine if it's a child, a sibling, or someone elses direct family.
 def traverse(curr,diction):#sorts in preorder(except reveresed sides)
 	# if((curr.child is None) and (curr.sibling is None) and (curr is not None)):#deals with the end of a tree branch
 	# 	diction.append({"height": curr.height,"width": curr.width, "word": curr.word})
-
 	if(curr.child is not None):
 		word= curr.child.txt.get("1.0",tk.END)
-		diction.append({"height": curr.child.height,"width": curr.child.width, "word": word})
+		diction.append({"height": curr.child.height,"width": curr.child.width, "word": word.strip("\r\n")})
 		traverse(curr.child,diction)
 	if(curr.sibling is not None):
 		word= curr.sibling.txt.get("1.0",tk.END)
-		diction.append({"height": curr.sibling.height,"width": curr.sibling.width, "word": word})
+		diction.append({"height": curr.sibling.height,"width": curr.sibling.width, "word": word.strip("\r\n")})
 		traverse(curr.sibling,diction)
 	return diction
 
@@ -181,13 +199,15 @@ def save():
 	diction = {}
 	diction["bob"]= []
 	curr.word = head.txt.get("1.0",tk.END)
-	diction["bob"].append({"height": curr.height,"width": curr.width, "word": curr.word})
+	diction["bob"].append({"height": curr.height,"width": curr.width, "word": curr.word.strip("\r\n")})
 	hold = traverse(curr,diction["bob"])
 	json.dump(hold,file,indent = 4)
 	file.close()	
 	
 def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
-	# print(str(height) + " " + str(width))
+	print(str(height) + " " + str(width))
+	# print("\nINSORT \n")
+	# printLinked(head)
 	if curr.child is not None:
 		sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
 	if curr.sibling is not None:
@@ -198,7 +218,6 @@ def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usual
 	curr.width = width
 	curr.txt.grid_configure(row = height, column = width)
 	curr.middleB.grid_configure(row = height, column = width+1)
-
 
 def conversion(converting):#this method converts string to int, or int to string
 	try:
@@ -223,30 +242,30 @@ def onFrameConfigure(canvas):
 	canvas.configure(scrollregion=canvas.bbox("all"))
 
 def _on_mousewheel(event):
-	mainCanvas.yview_scroll(-1*(int)(event.delta/120), "units")
+	mainCanvas.yview_scroll(-1*(int)(event.delta/40), "units")
 
 def initializeScollbar():
 	mainCanvas.grid(row = 0,column = 0,sticky = "ew")
 	mainCanvas.bind_all("<MouseWheel>", _on_mousewheel)
-	vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
+	
 	vsb.grid(column = 1,row = 0,sticky = "news")
-	hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
+	
 	hsb.grid(column=0,row = 1,sticky = "ew")
 	vsb.rowconfigure(0, weight=1)
 	hsb.columnconfigure(0, weight=1)
-	mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1400)	
+	mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1400,yscrollincrement = '2',xscrollincrement = '2')	
 	mainCanvas.create_window((12,12), window=frame, anchor="nw")
 	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
-
-
-
+	# mainCanvas.configure(yscrollincrement='2')
+def moveFocus(curr):
+	curr.focus_set()
 def printLinked(head):
-	print(str(head.height) + " " + str(head.width))
+	print(str(head.height) + " " + str(head.width) + " " + head.word)
 	if head.child is not None:
 		printLinked(head.child)
 	if head.sibling is not None:
 		printLinked(head.sibling)
-def countChildren(curr):#looks at relatives that are either same level(siblings) or descendents 
+def countChildren(curr):#counts number of descndents 
 	count = 0
 	stack = []
 	if curr.child is not None:
@@ -264,11 +283,17 @@ def countChildren(curr):#looks at relatives that are either same level(siblings)
 			stack.append(noder.sibling)
 			count+=1
 	return count
-
+	
+def test(low,high):
+	print(low,high)
+	vsb.set(low,high)
+	
 root = tk.Tk()
-globFile = "daily.txt"
+globFile = "something.txt"
 mainCanvas = tk.Canvas(root, background = 'gray30')# there are still methods that have master in them which we will not use anymore
 frame = tk.Frame(mainCanvas, background="gray30")
+vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
+hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
 initializeScollbar()
 head  = object(frame,0,0)
 gui = borderButtons(root)
