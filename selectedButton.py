@@ -6,6 +6,7 @@ from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
 import copy
+from tkinter import filedialog
 # https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
 class object:
@@ -141,6 +142,7 @@ class object:
 def addOpenFile(master,head):
 	gui.subMenu.add_command(label = "save", command = save)
 	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
+
 def insertNode(height,width):#inserts node into correct spot on tree given height and width
 	global head
 	#bfs search
@@ -157,8 +159,10 @@ def ancestor(curr,deltaW):#traverses up curr.parent deltaW times
 		curr = curr.parent
 	return curr
 def openTheFile(master):
-	print("cow")
-	with open(globFile) as json_file:  
+	filePath =  filedialog.askopenfilename()
+	if filePath == '':
+		return
+	with open(filePath) as json_file:  
 		data = json.load(json_file)
 		global head
 		head = object(master,data[0]["height"],data[0]["width"],data[0]["word"][:-2])
@@ -197,7 +201,8 @@ def traverse(curr,diction):#sorts in preorder(except reveresed sides)
 
 
 def save():
-	file = open(globFile, "w+")
+
+	file = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
 	global head
 	copyOfT = copy.copy(head)#copies the entire tree onto copyOfT
 	curr = copyOfT
@@ -259,6 +264,7 @@ def initializeScollbar():
 	mainCanvas.create_window((12,12), window=frame, anchor="nw")
 	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 	# mainCanvas.configure(yscrollincrement='2')
+	
 def moveFocus(curr):
 	curr.focus_set()
 def printLinked(head):
@@ -267,7 +273,7 @@ def printLinked(head):
 		printLinked(head.child)
 	if head.sibling is not None:
 		printLinked(head.sibling)
-def countChildren(curr):#counts number of descndents 
+def countChildren(curr):#counts number of descendents 
 	count = 0
 	stack = []
 	if curr.child is not None:
