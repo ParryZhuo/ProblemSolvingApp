@@ -6,6 +6,7 @@ from settings import storeObject
 from borderButtons import borderButtons
 from MalleuableTextBox import AutoResizedText
 import copy
+# https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
 class object:
 	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
@@ -31,7 +32,7 @@ class object:
 		self.txt.focus_set()
 		self.txt.bind("<Tab>", self.insertChild)
 		self.txt.bind("<Shift-Return>", self.insertSibling)
-		self.txt.bind("<Shift-Delete>",self.deleteSelf)
+		self.txt.bind("<Shift-Insert>",self.deleteSelf)
 		# self.txt.bind("<Shift>",lambda: test(90,90))
 		# self.txt.bind("<a>",lambda changeFocus: moveFocus(changeFocus))
 		# we need to bind each click, enter, or return.
@@ -108,18 +109,22 @@ class object:
 		deleteThis = []
 		findParent = self
 		curr = self
+		printLinked(head)
+		print("AFTER \n")
 		self.middleB.destroy()
 		self.txt.destroy()
 		# a bug we have is that the roots sibling cannot be deleted if it has children. Why is this the case? Because it's relation
 		# to the root is different than normel. So what needs to happen when we delete the node?
-		if(self.sibling is not None):#here we replace the link between the parent and the self with either none or it's sibling.
-			self.parent.child = self.sibling
-		else:
-			self.parent.child = None
+		switch = 0
 		if(self.child is not None):#here we are seeing if it has children so we can delete it and the rest of it's descendents using dfs
 			deleteThis.append(self.child)
+		else:
+			self.child = None
+		if(self.sibling is not None):#here we replace the link between the parent and the self with either none or it's sibling.
+			self.parent.child = self.sibling
+		else:		
 			self.parent.child =None
-				
+			
 		while deleteThis:
 			curr = deleteThis.pop(0)
 			curr.middleB.destroy()
@@ -205,9 +210,6 @@ def save():
 	file.close()	
 	
 def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
-	print(str(height) + " " + str(width))
-	# print("\nINSORT \n")
-	# printLinked(head)
 	if curr.child is not None:
 		sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
 	if curr.sibling is not None:
