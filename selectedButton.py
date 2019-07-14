@@ -9,6 +9,8 @@ import copy
 from tkinter import filedialog
 # https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
+
+#if this turns out to be a viable product we should make this also a note taking app. Where we can do like f10 or somethign to make an see through version of my app. That does not change.
 class object:
 	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
 		self.master = master
@@ -17,10 +19,10 @@ class object:
 		self.sibling = sibling
 		self.width=width
 		self.height=height
-		self.word = word.strip("\r\n")
 		self.txtBox(word)
 		self.mButton(0,0,"yellow")
 	def txtBox(self,word):
+		self.word = word.strip("\r\n")
 		nlines = word.count('\n')
 		nlines = (nlines * 25)+25
 		nWidth = word.split("\n")
@@ -38,9 +40,11 @@ class object:
 		# self.txt.bind("<a>",lambda changeFocus: moveFocus(changeFocus))
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
+
 	def insertText(self):#insert word into Text
 		self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40")
 		self.txt.grid(row = self.height, column = self.width)
+
 	def saveButton(self,bob):
 		try: # if there is something in temp, we insert txt into settings.py
 			# must find the lst location in settings that matches bob.id. Then insert bob.txt.get into lst[x]
@@ -116,16 +120,16 @@ class object:
 		self.txt.destroy()
 		# a bug we have is that the roots sibling cannot be deleted if it has children. Why is this the case? Because it's relation
 		# to the root is different than normel. So what needs to happen when we delete the node?
-		switch = 0
+		
 		if(self.child is not None):#here we are seeing if it has children so we can delete it and the rest of it's descendents using dfs
 			deleteThis.append(self.child)
 		else:
-			self.child = None
+			self.parent.child = None
+
 		if(self.sibling is not None):#here we replace the link between the parent and the self with either none or it's sibling.
 			self.parent.child = self.sibling
 		else:		
-			self.parent.child =None
-			
+			self.parent.sibling =None
 		while deleteThis:
 			curr = deleteThis.pop(0)
 			curr.middleB.destroy()
@@ -267,21 +271,20 @@ def initializeScollbar():
 	
 def moveFocus(curr):
 	curr.focus_set()
+
 def printLinked(head):
 	print(str(head.height) + " " + str(head.width) + " " + head.word)
 	if head.child is not None:
 		printLinked(head.child)
 	if head.sibling is not None:
 		printLinked(head.sibling)
+
 def countChildren(curr):#counts number of descendents 
 	count = 0
 	stack = []
 	if curr.child is not None:
 		count+=1
 		stack.append(curr.child)
-	# if curr.sibling is not None:
-	# 	count+=1
-	# 	stack.append(curr.sibling)
 	while stack:#uses dfs
 		noder = stack.pop(0)
 		if noder.child is not None:
@@ -300,8 +303,12 @@ root = tk.Tk()
 globFile = "something.txt"
 mainCanvas = tk.Canvas(root, background = 'gray30')# there are still methods that have master in them which we will not use anymore
 frame = tk.Frame(mainCanvas, background="gray30")
+mainCanvas.config(bg = "gray30")
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
+# root.wm_attributes("-topmost", True)
+# root.wm_attributes("-disabled", True)
+# root.wm_attributes("-transparentcolor", "white")
 initializeScollbar()
 head  = object(frame,0,0)
 gui = borderButtons(root)
