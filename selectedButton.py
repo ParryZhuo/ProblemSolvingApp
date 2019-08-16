@@ -3,7 +3,7 @@ import operator
 import json
 # import pdb
 from settings import storeObject
-from borderButtons import borderButtons
+# from borderButtons import borderButtons
 from textBox import AutoResizedText
 import copy
 import sys
