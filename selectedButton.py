@@ -6,6 +6,7 @@ from settings import storeObject
 from borderButtons import borderButtons
 from textBox import AutoResizedText
 import copy
+import sys
 from tkinter import filedialog
 # https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
@@ -152,9 +153,6 @@ def traverse(curr,diction):#sorts in preorder
 		diction.append({"height": curr.sibling.height,"width": curr.sibling.width, "word": word.strip("\r\n")})
 		traverse(curr.sibling,diction)
 	return diction
-
-
-
 	
 def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
 	if curr.child is not None:
@@ -192,14 +190,14 @@ def onFrameConfigure(canvas):
 def _on_mousewheel(event):
 	mainCanvas.yview_scroll(-1*(int)(event.delta/40), "units")
 
-def initializeScollbar():
+def initializeScollbar(master):
 	mainCanvas.grid(row = 0,column = 0,sticky = "ew")
 	mainCanvas.bind_all("<MouseWheel>", _on_mousewheel)
 	vsb.grid(column = 1,row = 0,sticky = "news")	
 	hsb.grid(column=0,row = 1,sticky = "ew")
 	vsb.rowconfigure(0, weight=1)
 	hsb.columnconfigure(0, weight=1)
-	mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = 700,width = 1400,yscrollincrement = '2',xscrollincrement = '2')	
+	mainCanvas.configure(yscrollcommand=vsb.set,xscrollcommand = hsb.set,height = master.winfo_screenheight()-120,width = master.winfo_screenwidth()-20,yscrollincrement = '2',xscrollincrement = '2')	
 	mainCanvas.create_window((12,12), window=frame, anchor="nw")
 	frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 	# mainCanvas.configure(yscrollincrement='2')
@@ -245,9 +243,32 @@ def NodeExists(height,width,start,Frame):#searches if the Node exists within the
 
 # @@@@@@@@@@@@@@@@@ THIS IS WHERE MENU METHODS START@@@@@@@@@@@@@@@@
 
-def addOpenFile(master,head):
-	gui.subMenu.add_command(label = "save", command = save)
-	gui.subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
+
+def initializeBorderButtons(master):
+	menu = tk.Menu(master)
+	master.config(menu = menu) 
+
+	subMenu = tk.Menu(menu,tearoff = 0) # creating a menu item within the menu
+	transparentMenu = tk.Menu(menu,tearoff = 0)
+
+	menu.add_cascade(label = "Edit", menu = subMenu) #Name of drop down menu
+	menu.add_cascade(label = "Transparancy",  menu = transparentMenu)
+
+	subMenu.add_command(label = "save", command = save)
+	subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
+	subMenu.add_separator()
+	subMenu.add_command(label = "Exit", command =lambda: sys.exit(1))
+
+	transparentMenu.add_command(label = "30%",command = lambda: changeRootTransparency(master,0.3))
+	transparentMenu.add_command(label = "50%",command =lambda: changeRootTransparency(master,0.5) )
+	transparentMenu.add_command(label = "60%",command = lambda: changeRootTransparency(master,0.6))
+	transparentMenu.add_command(label = "70%",command = lambda: changeRootTransparency(master,0.7))
+	transparentMenu.add_command(label = "80%",command = lambda: changeRootTransparency(master,0.8))
+	transparentMenu.add_command(label = "100%",command = lambda: changeRootTransparency(master,1.0))
+	
+def changeRootTransparency(master,percentage):
+	root.attributes("-alpha",percentage)
+
 def save():
 	file = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
 	global head
@@ -288,7 +309,10 @@ def openTheFile(master):
 				print("ERROR IN   " + str(data[index]["height"]) + " " + str(data[index]["width"]) +" " + str(data[index]["word"]) )
 
 # @@@@@@@@@@@@@@@@@ THIS IS WHERE MENU METHODS END@@@@@@@@@@@@@@@@
+
 root = tk.Tk() 
+root.geometry('%sx%s' % (root.winfo_screenwidth(),root.winfo_screenwidth()))
+initializeBorderButtons(root)
 mainCanvas = tk.Canvas(root, background = 'light cyan')
 # mainCanvas.attributes("-alpha", .30)
 
@@ -296,9 +320,10 @@ frame = tk.Frame(mainCanvas, background="light cyan")
 # mainCanvas.config(bg = "gray30")
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
-root.attributes("-alpha",0.6)
-initializeScollbar()
+root.attributes("-alpha",0.8)
+initializeScollbar(root)
 head  = object(frame,0,0)
-gui = borderButtons(root)	
-addOpenFile(frame,head)
+# gui = borderButtons(root)
+	
+# addOpenFile(frame,head)
 root.mainloop()
