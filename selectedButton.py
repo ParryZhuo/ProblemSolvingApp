@@ -3,7 +3,6 @@ import operator
 import json
 # import pdb
 from settings import storeObject
-# from borderButtons import borderButtons
 from textBox import AutoResizedText
 import copy
 import sys
@@ -11,7 +10,6 @@ from tkinter import filedialog
 # https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
 
-#if this turns out to be a viable product we should make this also a note taking app. Where we can do like f10 or somethign to make an see through version of my app. That does not change.
 class object:
 	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
 		self.master = master
@@ -19,8 +17,9 @@ class object:
 		self.parent = parent
 		self.sibling = sibling
 		self.width=width
-		self.height=height
+		self.height=height	
 		self.txtBox(word)
+		# print(mainCanvas.coords(self.txt))
 
 	def txtBox(self,word):
 		self.word = word.strip("\r\n")
@@ -42,6 +41,8 @@ class object:
 		# self.txt.bind("<a>",lambda changeFocus: moveFocus(changeFocus))
 		# we need to bind each click, enter, or return.
 		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
+		print(self.master.winfo_rooty())
+		# print(self.row_index)
 
 	def insertText(self):#insert word into Text
 		self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40")
@@ -86,7 +87,6 @@ class object:
 		deleteThis = []
 		findParent = self
 		curr = self
-		self.middleB.destroy()
 		self.txt.destroy()
 		# a bug we have is that the roots sibling cannot be deleted if it has children. Why is this the case? Because it's relation
 		# to the root is different than normel. So what needs to happen when we delete the node?
@@ -102,7 +102,6 @@ class object:
 			self.parent.sibling =None
 		while deleteThis:
 			curr = deleteThis.pop(0)
-			curr.middleB.destroy()
 			curr.txt.destroy()
 			if(curr.child is not None):
 				deleteThis.append(curr.child)
@@ -244,7 +243,7 @@ def NodeExists(height,width,start,Frame):#searches if the Node exists within the
 # @@@@@@@@@@@@@@@@@ THIS IS WHERE MENU METHODS START@@@@@@@@@@@@@@@@
 
 
-def initializeBorderButtons(master):
+def initializeBorderButtons(master,frame):
 	menu = tk.Menu(master)
 	master.config(menu = menu) 
 
@@ -255,7 +254,7 @@ def initializeBorderButtons(master):
 	menu.add_cascade(label = "Transparancy",  menu = transparentMenu)
 
 	subMenu.add_command(label = "save", command = save)
-	subMenu.add_command(label = "Open", command = lambda: openTheFile(master))
+	subMenu.add_command(label = "Open", command = lambda: openTheFile(frame))
 	subMenu.add_separator()
 	subMenu.add_command(label = "Exit", command =lambda: sys.exit(1))
 
@@ -312,18 +311,17 @@ def openTheFile(master):
 
 root = tk.Tk() 
 root.geometry('%sx%s' % (root.winfo_screenwidth(),root.winfo_screenwidth()))
-initializeBorderButtons(root)
+
 mainCanvas = tk.Canvas(root, background = 'light cyan')
 # mainCanvas.attributes("-alpha", .30)
 
 frame = tk.Frame(mainCanvas, background="light cyan")
-# mainCanvas.config(bg = "gray30")
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
 root.attributes("-alpha",0.8)
 initializeScollbar(root)
 head  = object(frame,0,0)
-# gui = borderButtons(root)
-	
+
+initializeBorderButtons(root,frame)
 # addOpenFile(frame,head)
 root.mainloop()
