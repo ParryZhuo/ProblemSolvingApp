@@ -10,7 +10,7 @@ from tkinter import filedialog
 # https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
 
-class object:
+class object:# so our bug exists on the first nodes siblings.
 	def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
 		self.master = master
 		self.child = child 
@@ -19,15 +19,15 @@ class object:
 		self.width=width
 		self.height=height	
 		self.txtBox(word)
-		# print(mainCanvas.coords(self.txt))
+		print(self.txt.grid_info())
 
 	def txtBox(self,word):
-		self.word = word.strip("\r\n")
+		self.word = word.strip("\r\n") 
 		nlines = word.count('\n')
 		nlines = (nlines * 25)+25
 		nWidth = word.split("\n")
 		maxLineLength = findMaxLine(nWidth)
-		self.txt = AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "white") #how to make int go by characters or something similar
+		self.txt = AutoResizedText(self.master, family="Arial",size=8, width = maxLineLength , height = nlines,background = "white") #how to make int go by characters or something similar
 		self.txt.grid(row = self.height, column = self.width)
 		self.txt._fit_to_size_of_text(word)
 		self.txt.bind("<Shift-Tab>", self.insertChild)
@@ -40,16 +40,12 @@ class object:
 		# self.txt.bind("<Shift>",lambda: test(90,90))
 		# self.txt.bind("<a>",lambda changeFocus: moveFocus(changeFocus))
 		# we need to bind each click, enter, or return.
-		#whichever command they call will save that button, being called so next time we call that command. It'll put it into settings.py
-		print(self.master.winfo_rooty())
-		# print(self.row_index)
-
 	def insertText(self):#insert word into Text
 		self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40")
 		self.txt.grid(row = self.height, column = self.width)
 
 
-
+		
 	def moveDown(self):
 		curr = self
 		while curr.parent is not None:
@@ -74,9 +70,9 @@ class object:
 
 		self.child = nextNode
 		# self.word = word.strip("\r\n")
-		distance = 100*(countChildren(self)+1)
-		mainCanvas.yview_scroll(distance, "units")
-		mainCanvas.xview_scroll(55, "units")
+		# distance = 100*(countChildren(self)+1)
+		# mainCanvas.yview_scroll(distance, "units")
+		# mainCanvas.xview_scroll(55, "units")
 		# findParent = self
 		# while findParent.parent is not None:
 		# 	findParent = findParent.parent
@@ -314,10 +310,12 @@ root.geometry('%sx%s' % (root.winfo_screenwidth(),root.winfo_screenwidth()))
 
 mainCanvas = tk.Canvas(root, background = 'light cyan')
 # mainCanvas.attributes("-alpha", .30)
-
+# onFrameConfigure(mainCanvas)# my guess is that rather than using "All", we look for the location of where our widget currently is
 frame = tk.Frame(mainCanvas, background="light cyan")
+
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
+mainCanvas.configure(scrollregion=mainCanvas.bbox("all"))
 root.attributes("-alpha",0.8)
 initializeScollbar(root)
 head  = object(frame,0,0)
