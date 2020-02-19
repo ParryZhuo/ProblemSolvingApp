@@ -26,19 +26,13 @@ class object:# so our bug exists on the first nodes siblings.
         nlines = (nlines * 25)+25
         nWidth = word.split("\n")
         maxLineLength = findMaxLine(nWidth)
-        self.txt = AutoResizedText(self.master, family="Arial",size=8, width = maxLineLength , height = nlines,background = "white") #how to make int go by characters or something similar
-        self.txt.grid(row = self.height, column = self.width)
+        self.txt = AutoResizedText(self.master, family="Arial",size=8, width = maxLineLength , height = nlines,background = "black",foreground = "white") #how to make int go by characters or something similar
+        self.txt.grid(row = self.height, column = self.width,columnspan=2)
         self.txt._fit_to_size_of_text(word)
-        # self.txt.bind("<Shift-Tab>", self.insertChild)
-        # self.txt.bind("<Shift-Return>", self.insertSibling)
-        # self.txt.bind("<Shift-Insert>",self.deleteSelf)
+        self.txt.bind("<Shift-Insert>",self.deleteSelf)
         self.txt.bind('<Shift-Up>',self.moveUp)
         self.txt.bind('<Shift-Down>',self.insertSibling)
         self.txt.bind('<Shift-Right>',self.insertChild)
-
-        # self.txt.bind("<Shift>",lambda: test(90,90))it 
-        self.txt.bind("<a>",lambda changeFocus: moveFocus(changeFocus))
-        # we need to bind each click, enter, or return.
     def insertText(self):#insert word into Text
         self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40")
         self.txt.grid(row = self.height, column = self.width)
@@ -140,15 +134,16 @@ def traverse(curr,diction):#sorts in preorder
     return diction
 	
 def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
-    if curr.child is not None:
-        sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
-    if curr.sibling is not None:
-        temp1=countChildren(curr)+1
-    sortButtons(curr.sibling,height+temp1,width)
+	if curr.child is not None:
+		sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
+	if curr.sibling is not None:
+		temp1=countChildren(curr)+1
+		sortButtons(curr.sibling,height+temp1,width)
 
-    curr.height = height
-    curr.width = width
-    curr.txt.grid_configure(row = height, column = width)
+	curr.height = height
+	curr.width = width
+	curr.txt.grid_configure(row = height, column = width)
+
 
 def conversion(converting):#this method converts string to int, or int to string
     try:
@@ -198,20 +193,20 @@ def printLinked(head):
         printLinked(head.sibling)
 
 def countChildren(curr):#counts number of descendents 
-    count = 0
-    stack = []
-    if curr.child is not None:
-        count+=1
-        stack.append(curr.child)
-    while stack:#uses dfs
-        noder = stack.pop(0)
-        if noder.child is not None:
-            stack.append(noder.child)
-            count+=1
-        if noder.sibling is not None:
-            stack.append(noder.sibling)
-            count+=1
-        return count
+	count = 0
+	stack = []
+	if curr.child is not None:
+		count+=1
+		stack.append(curr.child)
+	while stack:#uses dfs
+		noder = stack.pop(0)
+		if noder.child is not None:
+			stack.append(noder.child)
+			count+=1
+		if noder.sibling is not None:
+			stack.append(noder.sibling)
+			count+=1
+	return count
 
 def NodeExists(height,width,start,Frame):#searches if the Node exists within the tree
     curr = start
@@ -305,7 +300,7 @@ root.geometry('%sx%s' % (root.winfo_screenwidth(),root.winfo_screenwidth()))
 
 mainCanvas = tk.Canvas(root, background = 'black')
 # onFrameConfigure(mainCanvas)# my guess is that rather than using "All", we look for the location of where our widget currently is
-frame = tk.Frame(mainCanvas, background="light cyan")
+frame = tk.Frame(mainCanvas, background="black")
 
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
