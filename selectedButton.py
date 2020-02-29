@@ -4,14 +4,16 @@ import json
 # import pdb
 #from settings import storeObject
 from textBox import AutoResizedText
+from ttkEx import CustomNotebook
 import copy
 import sys
 from tkinter import filedialog
+from tkinter import ttk
 # https://tkdocs.com/tutorial/text.html <- good for learning tk.;
 #text.see() is helpful for future
-
+#http://tcl.tk/man/tcl8.5/TkCmd/grid.htm#M24
 class object:# so our bug exists on the first nodes siblings.
-    def __init__(self, master,height,width,word= "",child= None,parent = None, sibling= None):
+    def __init__(self, master,height=0,width=0,word= "",child= None,parent = None, sibling= None):
         self.master = master
         self.child = child 
         self.parent = parent
@@ -19,6 +21,7 @@ class object:# so our bug exists on the first nodes siblings.
         self.width=width
         self.height=height	
         self.txtBox(word)
+        frame.grid_columnconfigure(width*2,minsize=40)
         print(self.txt.grid_info())
     def txtBox(self,word):
         self.word = word.strip("\r\n") 
@@ -27,20 +30,18 @@ class object:# so our bug exists on the first nodes siblings.
         nWidth = word.split("\n")
         maxLineLength = findMaxLine(nWidth)
         self.txt = AutoResizedText(self.master, family="Arial",size=8, width = maxLineLength , height = nlines,background = "black",foreground = "white") #how to make int go by characters or something similar
-        self.txt.grid(row = self.height, column = self.width,columnspan=2)
+        self.txt.grid(row = self.height, column = self.width,columnspan = 2,sticky = "ew")
         self.txt._fit_to_size_of_text(word)
         self.txt.bind("<Shift-Insert>",self.deleteSelf)
         self.txt.bind('<Shift-Up>',self.moveUp)
         self.txt.bind('<Shift-Down>',self.insertSibling)
         self.txt.bind('<Shift-Right>',self.insertChild)
-    def insertText(self):#insert word into Text
-        self.txt = tk.AutoResizedText(self.master, family="Arial",size=12, width = maxLineLength , height = nlines,background = "gray40")
-        self.txt.grid(row = self.height, column = self.width)
 
     def moveUp(self,cow):
         if(self.parent):
             self.parent.txt.focus()
-    	
+    	#pixel padding
+    	#x,y
     def moveDown(self):
         curr = self
         while curr.parent is not None:
@@ -57,9 +58,9 @@ class object:# so our bug exists on the first nodes siblings.
         self.sibling = bob
         mainCanvas.yview_scroll(100, "units")
         sortButtons(head,0,0)
+
     def insertChild(self,cow):
         if (self.child):
-            print("I llove my child")
             self.child.txt.focus() 
             return
         nextNode = object(self.master,self.height+1,self.width+1,parent = self)
@@ -104,12 +105,10 @@ def insertNode(height,width):#inserts node into correct spot on tree given heigh
     stack.append(head)
     while stack:
         curr = stack.pop(0) 
-
         if((curr.child is not None) and (curr.child.height <=height) and (curr.child.width <=width)):
             stack.append(curr.child)
         if((curr.sibling is not None) and (curr.sibling.height <=height) and (curr.sibling.width <=width)):
             stack.append(curr.sibling)
-
 def ancestor(curr,width):#traverses up until curr.width = width
     while(curr.width !=width):
         curr = curr.parent
@@ -131,8 +130,7 @@ def traverse(curr,diction):#sorts in preorder
         word= curr.sibling.txt.get("1.0",tk.END)
         diction.append({"height": curr.sibling.height,"width": curr.sibling.width, "word": word.strip("\r\n")})
         traverse(curr.sibling,diction)
-    return diction
-	
+    return diction	
 def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usually head)
 	if curr.child is not None:
 		sortButtons(curr.child,height+1,width+1)#for each bob created from this child temp will increase by
@@ -142,9 +140,7 @@ def sortButtons(curr,height,width):#this sorts out bobs starting from curr(usual
 
 	curr.height = height
 	curr.width = width
-	curr.txt.grid_configure(row = height, column = width)
-
-
+	curr.txt.grid_configure(row = height, column = width,sticky = "w")
 def conversion(converting):#this method converts string to int, or int to string
     try:
 	#if it is a string with a number it will run this, changing it to an int
@@ -159,10 +155,9 @@ def findMaxLine(myList):
         for x in range(1,len(myList)):
             if myList[0] < myList[x]:
                 myList[0] = myList[x]
-        return int(myList[0])
+                return int(myList[0])
     except ValueError:
         return 100
-
 def onFrameConfigure(canvas):
     '''Reset the scroll region to encompass the inner frame'''
     canvas.configure(scrollregion=canvas.bbox("all"))
@@ -181,17 +176,14 @@ def initializeScollbar(master):
     mainCanvas.create_window((12,12), window=frame, anchor="nw")
     frame.bind("<Configure>", lambda event, canvas=mainCanvas: onFrameConfigure(mainCanvas))
 	# mainCanvas.configure(yscrollincrement='2')
-	
 def moveFocus(curr):
     curr.txt.focus_set()
-
 def printLinked(head):
     print(str(head.height) + " " + str(head.width) + " " + head.word)
     if head.child is not None:
         printLinked(head.child)
     if head.sibling is not None:
         printLinked(head.sibling)
-
 def countChildren(curr):#counts number of descendents 
 	count = 0
 	stack = []
@@ -207,7 +199,6 @@ def countChildren(curr):#counts number of descendents
 			stack.append(noder.sibling)
 			count+=1
 	return count
-
 def NodeExists(height,width,start,Frame):#searches if the Node exists within the tree
     curr = start
     stack  = []
@@ -219,12 +210,7 @@ def NodeExists(height,width,start,Frame):#searches if the Node exists within the
         if curr.sibling is not None:
             stack.append(curr.sibling)
     return object(Frame,self.height+1,self.width+1,parent = self)
-
-
-
 # @@@@@@@@@@@@@@@@@ THIS IS WHERE MENU METHODS START@@@@@@@@@@@@@@@@
-
-
 def initializeBorderButtons(master,frame):
     menu = tk.Menu(master)
     master.config(menu = menu) 
@@ -234,7 +220,7 @@ def initializeBorderButtons(master,frame):
 
     menu.add_cascade(label = "Edit", menu = subMenu) #Name of drop down menu
     menu.add_cascade(label = "Transparancy",  menu = transparentMenu)
-
+    subMenu.add_command(label = "new Tab", command = lambda: newTab(master))
     subMenu.add_command(label = "save", command = save)
     subMenu.add_command(label = "Open", command = lambda: openTheFile(frame))
     subMenu.add_separator()
@@ -245,11 +231,15 @@ def initializeBorderButtons(master,frame):
     transparentMenu.add_command(label = "60%",command = lambda: changeRootTransparency(master,0.6))
     transparentMenu.add_command(label = "70%",command = lambda: changeRootTransparency(master,0.7))
     transparentMenu.add_command(label = "80%",command = lambda: changeRootTransparency(master,0.8))
-    transparentMenu.add_command(label = "100%",command = lambda: changeRootTransparency(master,1.0))
-	
+    transparentMenu.add_command(label = "100%",command = lambda: changeRootTransparency(master,1.0))	
 def changeRootTransparency(master,percentage):
     root.attributes("-alpha",percentage)
-
+def newTab(master):
+	global head
+	newFrame = tk.Frame(master)
+	notebook.add(newFrame,text = "untitled")
+	# framelst.add(newFrame)
+	head = object(newFrame)
 def save():
     file = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
     global head
@@ -289,27 +279,27 @@ def openTheFile(master):
 				print("ERROR IN   " + str(data[index]["height"]) + " " + str(data[index]["width"]) +" " + str(data[index]["word"]) )
 
 # @@@@@@@@@@@@@@@@@ THIS IS WHERE MENU METHODS END@@@@@@@@@@@@@@@@
-def createToolBar(master):
-    toolbar = tk.Frame(master, bg = "yellow")
-    insertButt= tk.Button(toolbar,text="button")
-    insertButt.pack(side = tk.LEFT)
-    toolbar.grid(row=0,column=0)
+# def createToolBar(master):
+#     toolbar = tk.Frame(master, bg = "yellow")
+#     insertButt= tk.Button(toolbar,text="button")
+#     insertButt.pack(side = tk.LEFT)
+#     toolbar.grid(row=0,column=0)
 ######METHOD
+global head 
 root = tk.Tk() 
 root.geometry('%sx%s' % (root.winfo_screenwidth(),root.winfo_screenwidth()))
-
 mainCanvas = tk.Canvas(root, background = 'black')
 # onFrameConfigure(mainCanvas)# my guess is that rather than using "All", we look for the location of where our widget currently is
 frame = tk.Frame(mainCanvas, background="black")
-
+framelst = []
 vsb = tk.Scrollbar(root, orient="vertical",command=mainCanvas.yview)
 hsb = tk.Scrollbar(root, orient="horizontal",command=mainCanvas.xview)
 mainCanvas.configure(scrollregion=mainCanvas.bbox("all"))
 root.attributes("-alpha",0.8)
-createToolBar(root)
 initializeScollbar(root)
-head  = object(frame,0,0)
-
+notebook = CustomNotebook(frame)
+notebook.pack()
+newTab(notebook)
 initializeBorderButtons(root,frame)
 # addOpenFile(frame,head)
 root.mainloop()
