@@ -10,3 +10,7 @@ To break down the new goal/problem press: SHIFT-RIGHT
 To traverse upwards: SHIFT-LEFT
 
 To delete a goal/problem press - SHIFT-INSERT
+
+
+![image](https://user-images.githubusercontent.com/36753290/170846460-1703f019-fa4b-4351-bf40-a6230a6f68ed.png)
+
