@@ -5,6 +5,7 @@ way such that we can break down goals/problems into smaller ones to
 make them more easily solvable in a text format. Using tkinter.
 
 •	Created in Python, using double linked lists and DFS/BFS
+
 •	Explored a variety of data-structures through iterations of this app including dictionaries, hash tables, and many ways of using arrays 
 
 
