@@ -15,9 +15,6 @@ To delete a goal/problem press - SHIFT-INSERT
 
 •	Created in Python, using double linked lists and DFS/BFS
 
-•	Explored a variety of data-structures through iterations of this app including dictionaries, hash tables, and many ways of using arrays 
-
-
 
 ![image](https://user-images.githubusercontent.com/36753290/170846460-1703f019-fa4b-4351-bf40-a6230a6f68ed.png)
 
