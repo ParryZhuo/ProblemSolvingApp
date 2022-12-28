@@ -4,7 +4,8 @@ Designed and developed an app that helps users solve difficult/big problems by p
 a template to break problems into smaller/easier ones, then to break those sub-problems into even
 smaller ones continuing this process until the problems are at a manageable level.
 
-• Programmed in Python. Implemented using double linked lists and DFS/BFS(AKA breadth first/ depth first search)
+• Programmed in Python. Implemented a tree using double linked lists and 
+traversed through this tree using DFS/BFS(AKA breadth first/ depth first search)
 
 • Explored and implemented a variety of data-structures while creating previous iterations of
 this app including dictionaries, hash tables, and many ways of using arrays
