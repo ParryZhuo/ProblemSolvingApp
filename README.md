@@ -14,5 +14,7 @@ this app including dictionaries, hash tables, and many ways of using arrays
 that could be applied across a broad range of scenarios sacrificing efficiency for simplicity of
 code
 
+•Created the GUI in TKINTER gaining exposure to the structure of GUI's are programmed
+
 ![image](https://user-images.githubusercontent.com/36753290/170846460-1703f019-fa4b-4351-bf40-a6230a6f68ed.png)
 
