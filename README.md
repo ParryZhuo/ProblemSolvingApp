@@ -5,8 +5,10 @@ a template to break problems into smaller/easier ones, then to break those sub-p
 smaller ones continuing this process until the problems are at a manageable level.
 
 • Programmed in Python. Implemented using double linked lists and DFS/BFS(AKA breadth first/ depth first search)
+
 • Explored and implemented a variety of data-structures while creating previous iterations of
 this app including dictionaries, hash tables, and many ways of using arrays
+
 • Wrote the app in a way that understood when to use efficient code, or when to write code
 that could be applied across a broad range of scenarios sacrificing efficiency for simplicity of
 code
