@@ -15,11 +15,11 @@ the app including linked lists, dictionaries, hash tables, and many ways of usin
 
 Here is a code snippet from "selectedButton.py" 
 ```python
-    def deleteSelf(self,cow):#deletes itself as well as all descendents of self
+    def deleteSelf(self,cow):#deletes itself as well as all descendents of self utilizing DFS
         deleteThis = []
         findParent = self
         curr = self
-        self.txt.destroy()	
+        self.txt.destroy()
         if(self.child is not None):#here we are seeing if it has children so we can delete it and the rest of it's descendents using dfs
             deleteThis.append(self.child)
         self.parent.child = None
@@ -35,4 +35,4 @@ Here is a code snippet from "selectedButton.py"
             if(curr.sibling is not None):
                 deleteThis.append(curr.sibling)
             curr = None # DELETES REFERENCE To child
-            sortButtons(head,0,0)
+            sortButtons(head,0,0) #reorganizes GUI to fit the new structure created
