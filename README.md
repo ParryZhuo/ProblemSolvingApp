@@ -6,10 +6,14 @@ smaller ones continuing this process until the problems are at a manageable leve
 
 • Programmed in Python. Implemented a tree using double linked lists and 
 traversed through this tree using DFS/BFS(AKA breadth first/ depth first search)
+
 • Explored and implemented a variety of data-structures while creating iterations of
 the app including linked lists, dictionaries, hash tables, and many ways of using arrays
+
 • Gained practical experience in optimizing code for performance and scalability while maintaining a focus on readability and maintainability
+
 • Created the GUI in TKINTER gaining exposure to the structure of GUI's are programmed
+
 
 ![image](https://user-images.githubusercontent.com/36753290/170846460-1703f019-fa4b-4351-bf40-a6230a6f68ed.png)
 
